@@ -1,16 +1,19 @@
 "use client";
 
-import { useEffect } from "react";
-import { gsap } from "@/lib/gsap";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "gsap";
 import { FINE_POINTER, REDUCED_MOTION } from "@/lib/motion";
+
+// Loaded in its own chunk after hydration (see motion-loaders.tsx).
+gsap.registerPlugin(useGSAP);
 
 /**
  * One 9:16 preview for the whole services list. It follows the pointer
  * (lerped) and hard-cuts its content between rows. On keyboard focus it sits
  * beside the focused row instead.
  */
-export function ServicesHover() {
-  useEffect(() => {
+export default function ServicesHover() {
+  useGSAP(() => {
     const section = document.getElementById("what-we-do");
     const list = section?.querySelector<HTMLElement>("[data-services-list]");
     const preview = section?.querySelector<HTMLElement>("[data-services-preview]");

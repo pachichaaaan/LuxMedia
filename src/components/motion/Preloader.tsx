@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { gsap } from "@/lib/gsap";
 import { INTRO_DONE, INTRO_FLAG, REVEAL_HERO, type RevealHeroDetail } from "@/lib/preload";
 import { getLenis } from "@/lib/scroll";
 
@@ -10,6 +9,9 @@ const BADGE_RADIUS = 48;
 
 /** The overlay must be gone this many seconds after navigation start. */
 const HARD_CAP = 2.4;
+
+/** power3.inOut, as a CSS easing, for the Web Animations API. */
+const POWER3_IN_OUT = "cubic-bezier(0.65, 0, 0.35, 1)";
 
 /** Survives React's dev double-mount: cleanup defers, the remount cancels it. */
 let pendingFinish: ReturnType<typeof setTimeout> | undefined;
@@ -28,6 +30,9 @@ function heroMediaReady() {
  * fonts and hero media being ready, grows to fill the screen, then wipes out
  * the top as the hero headline rises. Once per session, home page only,
  * never under reduced motion, and never longer than the hard cap.
+ *
+ * It runs on requestAnimationFrame and the Web Animations API rather than
+ * GSAP, so it can start the moment the page hydrates.
  */
 export function Preloader() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -49,9 +54,11 @@ export function Preloader() {
     }
 
     let cancelled = false;
-    const tweens: gsap.core.Animation[] = [];
-    const track = <T extends gsap.core.Animation>(animation: T) => {
-      tweens.push(animation);
+    let frame = 0;
+    const animations: Animation[] = [];
+    const play = (element: Element, keyframes: Keyframe[], options: KeyframeAnimationOptions) => {
+      const animation = element.animate(keyframes, { fill: "forwards", ...options });
+      animations.push(animation);
       return animation;
     };
 
@@ -60,10 +67,11 @@ export function Preloader() {
       getLenis()?.start();
       window.dispatchEvent(new Event(INTRO_DONE));
     };
-    /** Past the cap (a background tab, a stalled device): drop everything and show the page. */
+    /** Past the cap (a background tab, a stalled device): stop and show the page. */
     const abort = () => {
       cancelled = true;
-      tweens.forEach((tween) => tween.kill());
+      cancelAnimationFrame(frame);
+      animations.forEach((animation) => animation.cancel());
       finish();
     };
     const late = () => performance.now() / 1000 > HARD_CAP + 0.3;
@@ -72,26 +80,30 @@ export function Preloader() {
     };
     document.addEventListener("visibilitychange", onVisibility);
 
+    /** Counts 1 to 98 with a power2.out curve. */
+    const countUp = (seconds: number) =>
+      new Promise<void>((resolve) => {
+        const start = performance.now();
+        const step = (now: number) => {
+          const t = seconds > 0 ? Math.min(1, (now - start) / (seconds * 1000)) : 1;
+          const eased = 1 - (1 - t) * (1 - t);
+          count.textContent = String(Math.round(1 + 97 * eased));
+          if (t < 1) frame = requestAnimationFrame(step);
+          else resolve();
+        };
+        frame = requestAnimationFrame(step);
+      });
+
     const run = async () => {
       // Hydration may land late on slow devices; fit the sequence into what's left.
       const budget = HARD_CAP - performance.now() / 1000;
       if (budget < 0.5 || document.visibilityState === "hidden") return finish();
       const outro = Math.min(0.9, budget * 0.45);
-      const phase = outro / 2;
+      const phase = (outro / 2) * 1000;
       const countTime = Math.max(0, Math.min(1.4, budget - outro - 0.15));
       const deadline = performance.now() + (budget - outro) * 1000;
 
-      const counter = { value: 1 };
-      await track(
-        gsap.to(counter, {
-          value: 98,
-          duration: countTime,
-          ease: "power2.out",
-          onUpdate: () => {
-            count.textContent = String(Math.round(counter.value));
-          },
-        }),
-      );
+      await countUp(countTime);
       await Promise.race([
         Promise.all([document.fonts?.ready, heroMediaReady()]),
         waitUntil(deadline),
@@ -101,35 +113,44 @@ export function Preloader() {
 
       count.textContent = "99+";
       const radius = Math.hypot(window.innerWidth, window.innerHeight) / 2 + 24;
-      track(gsap.to(count, { opacity: 0, duration: phase * 0.6, delay: phase * 0.3 }));
-      await track(
-        gsap.fromTo(
-          red,
+      play(count, [{ opacity: 1 }, { opacity: 0 }], { duration: phase * 0.6, delay: phase * 0.3 });
+      const expand = play(
+        red,
+        [
           { clipPath: `circle(${BADGE_RADIUS}px at 50% 50%)` },
-          { clipPath: `circle(${radius}px at 50% 50%)`, duration: phase, ease: "power3.inOut" },
-        ),
+          { clipPath: `circle(${radius}px at 50% 50%)` },
+        ],
+        { duration: phase, easing: POWER3_IN_OUT },
       );
+      await expand.finished;
       if (cancelled) return;
       if (late()) return abort();
 
-      // Fully red: swap shapes invisibly, park the headline, then wipe.
+      // Fully red: swap shapes invisibly, ask the hero to rise, then wipe.
       root.style.backgroundColor = "transparent";
-      gsap.set(red, { clipPath: "inset(0% 0% 0% 0%)" });
       window.dispatchEvent(
-        new CustomEvent<RevealHeroDetail>(REVEAL_HERO, { detail: { delay: phase * 0.35 } }),
+        new CustomEvent<RevealHeroDetail>(REVEAL_HERO, {
+          detail: { delay: (phase * 0.35) / 1000 },
+        }),
       );
-      await track(
-        gsap.to(red, { clipPath: "inset(0% 0% 100% 0%)", duration: phase, ease: "power3.inOut" }),
+      const wipe = play(
+        red,
+        [{ clipPath: "inset(0% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 100% 0%)" }],
+        { duration: phase, easing: POWER3_IN_OUT },
       );
-      finish();
+      await wipe.finished;
+      if (!cancelled) finish();
     };
 
-    run();
+    run().catch(() => {
+      // A cancelled animation rejects its `finished` promise; nothing to do.
+    });
 
     return () => {
       cancelled = true;
       document.removeEventListener("visibilitychange", onVisibility);
-      tweens.forEach((tween) => tween.kill());
+      cancelAnimationFrame(frame);
+      animations.forEach((animation) => animation.cancel());
       if (html.hasAttribute("data-preload")) pendingFinish = setTimeout(finish, 50);
     };
   }, []);

@@ -3,7 +3,7 @@ import { home } from "@/content/site";
 import { Clock } from "@/components/ui/Clock";
 import { LiveDot } from "@/components/ui/LiveDot";
 import { MediaSlot } from "@/components/ui/MediaSlot";
-import { HeroMotion } from "./HeroMotion";
+import { HeroMotion } from "./motion-loaders";
 
 /** Home hero: the tagline as the thesis, a live feed frame, and the HQ clock. */
 export function Hero() {

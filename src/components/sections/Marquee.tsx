@@ -1,7 +1,7 @@
 import { clients, type Wordmark } from "@/content/clients";
 import { home } from "@/content/site";
 import { cn } from "@/lib/utils";
-import { MarqueeMotion } from "./MarqueeMotion";
+import { MarqueeMotion } from "./motion-loaders";
 
 const STYLE: Record<Wordmark["style"], string> = {
   plain: "",

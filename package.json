@@ -12,7 +12,8 @@
     "format:check": "prettier --check .",
     "media:manifest": "tsx scripts/media-manifest.ts",
     "check": "npm run lint && npm run typecheck && npm run build",
-    "screenshots": "node scripts/screenshots.mjs"
+    "screenshots": "node scripts/screenshots.mjs",
+    "a11y": "node scripts/a11y.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -28,6 +29,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^24.19.1",
     "@types/react": "^19.3.0",

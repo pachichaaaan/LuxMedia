@@ -8,6 +8,7 @@ import { Services } from "@/components/sections/Services";
 import { Story } from "@/components/sections/Story";
 import { WorkRail } from "@/components/sections/WorkRail";
 import { home } from "@/content/site";
+import { organizationJsonLd, toJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -16,6 +17,10 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: toJsonLd(organizationJsonLd) }}
+      />
       <Hero />
       <Story />
       <Services />

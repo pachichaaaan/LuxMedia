@@ -1,11 +1,19 @@
 "use client";
 
-import { useEffect } from "react";
 import { home } from "@/content/site";
 import { story, unreadChapter } from "@/content/story";
-import { gsap, ScrollTrigger, SplitText } from "@/lib/gsap";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "gsap";
+import { provideScrollTrigger } from "@/lib/gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
 import { scrollToTarget } from "@/lib/scroll";
+import { whenNear } from "@/lib/when-near";
 import { clamp } from "@/lib/utils";
+
+// This module only ever loads in its own lazy chunk, so a static import is fine here.
+gsap.registerPlugin(useGSAP, ScrollTrigger, SplitText);
+provideScrollTrigger(ScrollTrigger);
 
 const COUNT = story.length;
 /** Viewport heights of scroll per chapter while pinned. */
@@ -24,17 +32,20 @@ type Mode = "pinned" | "viewer";
  * viewer (phones).
  */
 export default function StoryController() {
-  useEffect(() => {
+  useGSAP(() => {
     const section = document.getElementById("story");
     if (!section) return;
 
-    const mm = gsap.matchMedia();
-    mm.add({ pinned: PINNED, viewer: VIEWER }, (context) => {
-      const { pinned, viewer } = context.conditions as { pinned: boolean; viewer: boolean };
-      if (!pinned && !viewer) return;
-      return setup(section, pinned ? "pinned" : "viewer");
+    // Below the fold: set up only when the section is about a screen away.
+    return whenNear(section, () => {
+      const mm = gsap.matchMedia();
+      mm.add({ pinned: PINNED, viewer: VIEWER }, (context) => {
+        const { pinned, viewer } = context.conditions as { pinned: boolean; viewer: boolean };
+        if (!pinned && !viewer) return;
+        return setup(section, pinned ? "pinned" : "viewer");
+      });
+      return () => mm.revert();
     });
-    return () => mm.revert();
   }, []);
 
   return null;
@@ -68,6 +79,8 @@ function setup(section: HTMLElement, mode: Mode) {
       SplitText.create(element, {
         type: "lines",
         mask: "lines",
+        // Line splits keep words intact, so the text reads normally as-is.
+        aria: "none",
         autoSplit: true,
         onSplit(self) {
           gsap.set(self.masks, { paddingBlock: "0.14em", marginBlock: "-0.14em" });
@@ -164,9 +177,13 @@ function setup(section: HTMLElement, mode: Mode) {
       pinSpacing: true,
       anticipatePin: 1,
       invalidateOnRefresh: true,
+      // Pins can be set up in either order; the Story always measures first.
+      refreshPriority: 2,
       onUpdate: (self) => apply(self.progress),
       onRefresh: (self) => apply(self.progress),
     });
+    ScrollTrigger.sort();
+    ScrollTrigger.refresh();
     apply(trigger.progress);
 
     go = (index) => {

@@ -1,10 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
 import { home } from "@/content/site";
-import { gsap, ScrollTrigger, SplitText } from "@/lib/gsap";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "gsap";
+import { provideScrollTrigger } from "@/lib/gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
 import { REDUCED_MOTION } from "@/lib/motion";
 import { INTRO_DONE, REVEAL_HERO, type RevealHeroDetail } from "@/lib/preload";
+
+// Loaded in its own chunk after hydration (see motion-loaders.tsx).
+gsap.registerPlugin(useGSAP, ScrollTrigger, SplitText);
+provideScrollTrigger(ScrollTrigger);
 
 const HOLD = 2.8;
 const MOVE = 0.9;
@@ -16,8 +23,8 @@ const DRIFT = [0, -6, -12, -18, -24];
  * exactly once: the line reveal (asked for by the preloader or a page
  * transition), the scroll drift, the frame easing back, and the feed.
  */
-export function HeroMotion() {
-  useEffect(() => {
+export default function HeroMotion() {
+  useGSAP(() => {
     const section = document.getElementById("hero");
     const title = section?.querySelector<HTMLElement>("[data-hero-title]");
     const frame = section?.querySelector<HTMLElement>("[data-hero-frame]");
@@ -33,16 +40,26 @@ export function HeroMotion() {
     // Headline: masked lines. Masks drift on scroll; lines rise inside them on reveal.
     let lines: Element[] = [];
     let pendingReveal: number | null = null;
+    let revealed = false;
     const reveal = (delay: number) => {
+      if (revealed) return;
       if (!lines.length) {
         pendingReveal = delay;
         return;
       }
+      revealed = true;
       ctx.add(() => {
         gsap.fromTo(
           lines,
           { yPercent: 135 },
-          { yPercent: 0, duration: 0.9, stagger: 0.08, ease: "expo.out", delay, overwrite: true },
+          {
+            yPercent: 0,
+            duration: 0.9,
+            stagger: 0.08,
+            ease: "expo.out",
+            delay,
+            overwrite: true,
+          },
         );
       });
     };
@@ -52,6 +69,8 @@ export function HeroMotion() {
       SplitText.create(title, {
         type: "lines",
         mask: "lines",
+        // Line splits keep words intact, so the text reads normally as-is.
+        aria: "none",
         autoSplit: true,
         onSplit(self) {
           gsap.set(self.masks, { paddingBlock: "0.14em", marginBlock: "-0.14em" });
@@ -66,7 +85,12 @@ export function HeroMotion() {
           return gsap.to(self.masks, {
             yPercent: (index: number) => DRIFT[index] ?? DRIFT[DRIFT.length - 1],
             ease: "none",
-            scrollTrigger: { trigger: section, start: "top top", end: "bottom top", scrub: 0.6 },
+            scrollTrigger: {
+              trigger: section,
+              start: "top top",
+              end: "bottom top",
+              scrub: 0.6,
+            },
           });
         },
       });
@@ -84,6 +108,8 @@ export function HeroMotion() {
     const onReveal = (event: Event) =>
       reveal((event as CustomEvent<RevealHeroDetail>).detail.delay);
     window.addEventListener(REVEAL_HERO, onReveal);
+    // This chunk can arrive after a transition into home has already asked.
+    if (document.documentElement.hasAttribute("data-transitioning")) reveal(0.12);
     cleanups.push(() => window.removeEventListener(REVEAL_HERO, onReveal));
 
     // Feed: hold, flick up one post, repeat. The last slot is a copy of the first.
@@ -92,7 +118,7 @@ export function HeroMotion() {
     let userPaused = false;
     let hovering = false;
     let onScreen = true;
-    let timer: gsap.core.Tween | undefined;
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
     const advance = () => {
       index += 1;
@@ -112,13 +138,14 @@ export function HeroMotion() {
       });
     };
     const schedule = () => {
-      timer?.kill();
+      clearTimeout(timer);
       if (userPaused || hovering || !onScreen) return;
-      timer = gsap.delayedCall(HOLD, advance);
+      // A plain timeout, so GSAP's ticker can sleep through the hold.
+      timer = setTimeout(advance, HOLD * 1000);
     };
     const pauseFor = (state: () => void) => {
       state();
-      if (userPaused || hovering || !onScreen) timer?.kill();
+      if (userPaused || hovering || !onScreen) clearTimeout(timer);
       else schedule();
     };
 
@@ -140,7 +167,7 @@ export function HeroMotion() {
       feed.removeEventListener("pointerleave", onLeave);
       toggle.removeEventListener("click", onToggle);
       observer.disconnect();
-      timer?.kill();
+      clearTimeout(timer);
     });
 
     // Don't start posting until the preloader has handed over the screen.

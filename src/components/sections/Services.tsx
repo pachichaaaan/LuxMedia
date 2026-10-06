@@ -3,7 +3,7 @@ import { Disclosure } from "@/components/ui/Disclosure";
 import { MediaSlot } from "@/components/ui/MediaSlot";
 import { services } from "@/content/services";
 import { home } from "@/content/site";
-import { ServicesHover } from "./ServicesHover";
+import { ServicesHover } from "./motion-loaders";
 
 /**
  * Not cards: a list at h2 size, separated by rules, because it is a list.

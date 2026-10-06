@@ -1,18 +1,18 @@
 "use client";
 
-import { gsap } from "gsap";
-import { Flip } from "gsap/Flip";
+import type { Flip as FlipPlugin } from "gsap/Flip";
 import { useSearchParams } from "next/navigation";
-import { useLayoutEffect, useRef, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, type RefObject } from "react";
 import { Chip } from "@/components/ui/Chip";
 import { services } from "@/content/services";
 import { workPage } from "@/content/site";
 import { work } from "@/content/work";
+import { loadGsap, type Gsap } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { CaseLink } from "./CaseLink";
 
-gsap.registerPlugin(Flip);
+type FlipApi = typeof FlipPlugin;
 
 /** Deliberate placement in mixed ratios, by position in the visible list. */
 const PLACEMENT = [
@@ -32,11 +32,33 @@ export function WorkIndex() {
   const requested = params.get("service") ?? "";
   const active = services.some((service) => service.slug === requested) ? requested : "";
   const gridRef = useRef<HTMLUListElement>(null);
-  const flipState = useRef<Flip.FlipState | null>(null);
+  const flipRef = useRef<{ Flip: FlipApi; gsap: Gsap } | null>(null);
+  const flipState = useRef<ReturnType<FlipApi["getState"]> | null>(null);
+
+  // Flip is only needed once someone filters; fetch it when the browser is idle.
+  useEffect(() => {
+    let cancelled = false;
+    const load = () =>
+      Promise.all([loadGsap(), import("gsap/Flip")]).then(([{ gsap }, { Flip }]) => {
+        if (cancelled) return;
+        gsap.registerPlugin(Flip);
+        flipRef.current = { Flip, gsap };
+      });
+    const handle =
+      typeof window.requestIdleCallback === "function"
+        ? window.requestIdleCallback(() => void load())
+        : window.setTimeout(() => void load(), 200);
+    return () => {
+      cancelled = true;
+      if (typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(handle);
+      else window.clearTimeout(handle);
+    };
+  }, []);
 
   const select = (slug: string) => {
     if (slug === active) return;
-    if (gridRef.current && !prefersReducedMotion()) {
+    const Flip = flipRef.current?.Flip;
+    if (Flip && gridRef.current && !prefersReducedMotion()) {
       flipState.current = Flip.getState(gridRef.current.querySelectorAll("[data-flip-id]"));
     }
     const url = slug ? `${window.location.pathname}?service=${slug}` : window.location.pathname;
@@ -46,7 +68,9 @@ export function WorkIndex() {
 
   useLayoutEffect(() => {
     const state = flipState.current;
-    if (!state) return;
+    const loaded = flipRef.current;
+    if (!state || !loaded) return;
+    const { Flip, gsap } = loaded;
     flipState.current = null;
     const flip = Flip.from(state, {
       duration: 0.6,

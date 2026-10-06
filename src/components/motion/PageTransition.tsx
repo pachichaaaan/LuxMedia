@@ -5,12 +5,13 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   type ReactNode,
 } from "react";
-import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { gsapKit, loadGsap, scrollTrigger, type GsapKit } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/motion";
 import { REVEAL_HERO, type RevealHeroDetail } from "@/lib/preload";
 import { splitForReveal } from "@/lib/reveal";
@@ -45,13 +46,18 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
   const pendingCommit = useRef<(() => void) | null>(null);
   const isFirstRender = useRef(true);
 
-  const finish = useCallback(() => {
+  // Warm the animation kit once the page is idle; transitions need it on first click.
+  useEffect(() => {
+    void loadGsap();
+  }, []);
+
+  const finish = useCallback(({ gsap }: GsapKit) => {
     busy.current = false;
     document.documentElement.removeAttribute("data-transitioning");
     if (panelRef.current) gsap.set(panelRef.current, { clipPath: BELOW });
 
     if (process.env.NODE_ENV !== "production") {
-      const leaked = ScrollTrigger.getAll().filter(
+      const leaked = (scrollTrigger()?.getAll() ?? []).filter(
         (trigger) => trigger.trigger && !document.documentElement.contains(trigger.trigger),
       );
       if (leaked.length) {
@@ -61,35 +67,39 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   /** Wipes the panel out the top and reveals the new page's headline. */
-  const playEnter = useCallback(() => {
-    const panel = panelRef.current;
-    if (!panel) return finish();
-    ScrollTrigger.refresh();
+  const playEnter = useCallback(
+    (kit: GsapKit) => {
+      const { gsap } = kit;
+      const panel = panelRef.current;
+      if (!panel) return finish(kit);
+      scrollTrigger()?.refresh();
 
-    // The panel releases the page as soon as it's gone; the headline finishes on its own.
-    gsap.fromTo(
-      panel,
-      { clipPath: COVERED },
-      { clipPath: ABOVE, duration: PHASE, ease: "power3.inOut", onComplete: finish },
-    );
-    if (document.querySelector("main [data-hero-title]")) {
-      window.dispatchEvent(
-        new CustomEvent<RevealHeroDetail>(REVEAL_HERO, { detail: { delay: 0.12 } }),
+      // The panel releases the page as soon as it's gone; the headline finishes on its own.
+      gsap.fromTo(
+        panel,
+        { clipPath: COVERED },
+        { clipPath: ABOVE, duration: PHASE, ease: "power3.inOut", onComplete: () => finish(kit) },
       );
-    }
-    const title = document.querySelector<HTMLElement>("main [data-page-title]");
-    if (title) {
-      const split = splitForReveal(title);
-      gsap.to(split.lines, {
-        yPercent: 0,
-        duration: 0.8,
-        stagger: 0.08,
-        ease: "expo.out",
-        delay: 0.12,
-        onComplete: () => split.revert(),
-      });
-    }
-  }, [finish]);
+      if (document.querySelector("main [data-hero-title]")) {
+        window.dispatchEvent(
+          new CustomEvent<RevealHeroDetail>(REVEAL_HERO, { detail: { delay: 0.12 } }),
+        );
+      }
+      const title = document.querySelector<HTMLElement>("main [data-page-title]");
+      if (title) {
+        const split = splitForReveal(kit, title);
+        gsap.to(split.lines, {
+          yPercent: 0,
+          duration: 0.8,
+          stagger: 0.08,
+          ease: "expo.out",
+          delay: 0.12,
+          onComplete: () => split.revert(),
+        });
+      }
+    },
+    [finish],
+  );
 
   // Runs after the new route commits, before the browser paints it.
   useLayoutEffect(() => {
@@ -104,14 +114,15 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
       return;
     }
     // A navigation we didn't start (back or forward). Cover before paint, then enter.
-    if (busy.current || prefersReducedMotion() || !panelRef.current) {
-      ScrollTrigger.refresh();
+    const kit = gsapKit();
+    if (!kit || busy.current || prefersReducedMotion() || !panelRef.current) {
+      if (kit) scrollTrigger()?.refresh();
       return;
     }
     busy.current = true;
     document.documentElement.setAttribute("data-transitioning", "");
-    gsap.set(panelRef.current, { clipPath: COVERED });
-    requestAnimationFrame(playEnter);
+    kit.gsap.set(panelRef.current, { clipPath: COVERED });
+    requestAnimationFrame(() => playEnter(kit));
   }, [pathname, playEnter]);
 
   const navigate = useCallback(
@@ -126,7 +137,8 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
       busy.current = true;
       document.documentElement.setAttribute("data-transitioning", "");
 
-      await gsap.fromTo(
+      const kit = await loadGsap({ urgent: true });
+      await kit.gsap.fromTo(
         panel,
         { clipPath: BELOW },
         { clipPath: COVERED, duration: PHASE, ease: "power3.inOut" },
@@ -150,7 +162,7 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
       }
 
       await nextFrame();
-      playEnter();
+      playEnter(kit);
     },
     [router, playEnter],
   );

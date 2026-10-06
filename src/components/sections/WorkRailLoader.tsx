@@ -9,6 +9,7 @@ import {
   useMediaQuery,
   usePrefersReducedMotion,
 } from "@/lib/motion";
+import { useAfterFirstIdle } from "@/lib/idle";
 
 const WorkRailController = dynamic(() => import("./WorkRailController"), { ssr: false });
 const WorkHoverGL = dynamic(() => import("./WorkHoverGL"), { ssr: false });
@@ -23,6 +24,7 @@ export function WorkRailLoader() {
   const reduced = usePrefersReducedMotion();
   const desktop = useMediaQuery(DESKTOP);
   const [near, setNear] = useState(false);
+  const idle = useAfterFirstIdle();
   const capable = fine && desktop && !reduced && !isLowPower();
 
   useEffect(() => {
@@ -44,8 +46,8 @@ export function WorkRailLoader() {
 
   return (
     <>
-      <WorkRailController />
-      {capable && near && <WorkHoverGL />}
+      {idle && <WorkRailController />}
+      {idle && capable && near && <WorkHoverGL />}
     </>
   );
 }

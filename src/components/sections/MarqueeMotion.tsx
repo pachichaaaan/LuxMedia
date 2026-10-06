@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
 import { home } from "@/content/site";
-import { gsap } from "@/lib/gsap";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "gsap";
 import { REDUCED_MOTION } from "@/lib/motion";
+
+// Loaded in its own chunk after hydration (see motion-loaders.tsx).
+gsap.registerPlugin(useGSAP);
 
 /** One loop every 40 seconds at rest. */
 const LOOP_SECONDS = 40;
@@ -13,8 +16,8 @@ const MAX_BOOST = 4;
  * Linear drift, the only linear motion on the site. Scroll velocity adds
  * speed (up to 4×) and scroll direction sets which way it runs.
  */
-export function MarqueeMotion() {
-  useEffect(() => {
+export default function MarqueeMotion() {
+  useGSAP(() => {
     const section = document.getElementById("clients");
     const strip = section?.querySelector<HTMLElement>("[data-marquee]");
     const first = section?.querySelector<HTMLElement>("[data-marquee-track]");
@@ -40,17 +43,30 @@ export function MarqueeMotion() {
         boost = Math.min(MAX_BOOST - 1, boost + Math.abs(scrolled) * 0.02);
       }
       boost *= 0.92;
-      if (hovering || userPaused || !onScreen || !width) return;
+      if (!width) return;
       const speed = (width / LOOP_SECONDS) * (1 + boost);
       x += direction * speed * (deltaMs / 1000);
       // Wrap within one track width so the clone always fills the gap.
       x = ((x % width) - width) % width;
       setX(x);
     };
-    gsap.ticker.add(tick);
+    // Only tick while it can be seen and isn't paused; otherwise it costs nothing.
+    let running = false;
+    const sync = () => {
+      const shouldRun = onScreen && !hovering && !userPaused;
+      if (shouldRun === running) return;
+      running = shouldRun;
+      if (running) {
+        lastScroll = window.scrollY;
+        gsap.ticker.add(tick);
+      } else {
+        gsap.ticker.remove(tick);
+      }
+    };
 
     const observer = new IntersectionObserver(([entry]) => {
       onScreen = Boolean(entry?.isIntersecting);
+      sync();
     });
     observer.observe(section);
     const resize = new ResizeObserver(() => {
@@ -58,10 +74,17 @@ export function MarqueeMotion() {
     });
     resize.observe(first);
 
-    const onEnter = () => (hovering = true);
-    const onLeave = () => (hovering = false);
+    const onEnter = () => {
+      hovering = true;
+      sync();
+    };
+    const onLeave = () => {
+      hovering = false;
+      sync();
+    };
     const onToggle = () => {
       userPaused = !userPaused;
+      sync();
       toggle.textContent = userPaused ? home.clients.play : home.clients.pause;
       toggle.setAttribute(
         "aria-label",
