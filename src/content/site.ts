@@ -1,10 +1,8 @@
 import { brand } from "./brand";
 import type { Link, Visual } from "./types";
 
-/** Primary navigation, in display order. */
+/** Primary navigation, in display order. Also used by the mobile menu and the footer. */
 export const navLinks: Link[] = [
-  { href: "/work", label: "Work" },
-  { href: "/about", label: "About" },
   { href: "/services", label: "Services" },
   { href: "/contact", label: "Contact" },
 ];
@@ -101,15 +99,6 @@ export const home = {
   services: {
     heading: "Six services. Most clients start with two.",
     allLink: "See all services",
-  },
-  work: {
-    heading: "Work that moved a number.",
-    allLink: "See all work",
-  },
-  comments: {
-    heading: "From the comments.",
-    likes: (n: number) => `${n.toLocaleString("en-US")} ${n === 1 ? "like" : "likes"}`,
-    replyLabel: "Reply from the team",
   },
   clients: {
     heading: "Brands we post for",

@@ -12,7 +12,7 @@ export const brand = {
   founded: 2015,
   /** Set `city` to a real place to switch copy from "at HQ" to "in <city>". */
   hq: { city: "TBD", timezone: "Asia/Manila" },
-  email: "hello@theluxexpo.example",
+  email: "jermainemartin@gmail.com",
   socials: {
     instagram: "https://instagram.com/",
     tiktok: "https://tiktok.com/",

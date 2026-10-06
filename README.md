@@ -2,7 +2,7 @@
 
 Marketing site for The Lux Expo, a social media management company. The company story is told as Stories: a 9:16 frame, segmented progress bars, scroll or tap to advance.
 
-Built with Next.js (App Router), Tailwind CSS v4, GSAP with ScrollTrigger and SplitText, Lenis, and React Three Fiber. The design plan, tokens, contrast ratios, and motion map are in [DESIGN.md](DESIGN.md).
+Built with Next.js (App Router), Tailwind CSS v4, GSAP with ScrollTrigger and SplitText, and Lenis. The design plan, tokens, contrast ratios, and motion map are in [DESIGN.md](DESIGN.md).
 
 ## Setup
 
@@ -118,5 +118,4 @@ Details are in DESIGN.md §8.
 - **ESLint 9.** ESLint 10 is out, but the React plugin bundled in `eslint-config-next` 16.3 crashes on it.
 - **Page transitions.** Next 16.3 exposes React's `<ViewTransition>`, but it ships from React's canary channel and isn't marked stable. Transitions use a small `TransitionProvider` with a custom link instead (see DESIGN.md).
 - **Inline CSS.** `experimental.inlineCss` is on. Tailwind's output is about 9 KB gzipped, and inlining it removes the render-blocking stylesheet request. Turn it off in `next.config.ts` if most visitors are returning visitors.
-- **One filtered warning.** three r183 deprecates `THREE.Clock`, which React Three Fiber 9.8 still creates. `WorkHoverGL.tsx` filters that one message through three's `setConsoleFunction`. Remove the filter once R3F moves to `THREE.Timer`.
 - **Fonts.** `src/assets/fonts/Poppins-Bold.ttf` (SIL Open Font License, included) is used only to render Open Graph images and icons. The site itself loads Poppins through `next/font`.

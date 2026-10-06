@@ -891,6 +891,15 @@ All ten proposals from the plan were approved as written: midnight focus rings o
 
 ---
 
+### Changes after launch (2026-10-06)
+
+| Change                                                 | Effect                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Work and About removed from the navigation             | Header, mobile menu, and footer list Services and Contact. Both pages still exist and are reachable from links and the sitemap.                                                                                                                                                                                                                     |
+| Selected work rail removed from the home page          | The rail, its controller, the WebGL hover, and their styles are gone, along with `three`, `@react-three/fiber`, and `@react-three/drei`. Case studies are now reached from Services ("Related case study"), the Work index, and each case study's "Next case study" link. Sections 3.11, 3.12, and the WebGL notes in §8 describe the removed rail. |
+| "From the comments." thread removed from the home page | Home now runs hero, Story, What we do, wordmarks, process, CTA. Testimonials still appear on case study pages. Section 3.13 describes the removed thread.                                                                                                                                                                                           |
+| Contact email changed to jermainemartin@gmail.com      | Set in `brand.ts`; used by the footer, CTA, mobile menu, Contact, Privacy, form errors, and as the default delivery address.                                                                                                                                                                                                                        |
+
 ## 11. QA log
 
 **Method.** Playwright drove the system's Edge browser against a production build: full-page screenshots of every route at 375, 768, and 1440 (`npm run screenshots`), scripted checks of every interaction, axe-core on every route at two widths with and without reduced motion (`npm run a11y`), Lighthouse mobile, and a development pass for hydration warnings and ScrollTrigger leaks.
