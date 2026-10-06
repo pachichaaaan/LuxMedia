@@ -29,7 +29,7 @@ export function Hero() {
           className="relative aspect-[9/16] overflow-hidden rounded-frame"
         >
           {first && (
-            <div className={`absolute inset-0 media-tone-${first.visual.tone}`}>
+            <div data-hero-media className={`absolute inset-0 media-tone-${first.visual.tone}`}>
               <MediaSlot {...first.visual} fill sizes="(min-width: 1024px) 22vw, 45vw" />
               <p className="absolute top-4 left-4 text-small">{first.handle}</p>
               <p className="absolute right-4 bottom-4 left-4 text-small">{first.caption}</p>

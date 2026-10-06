@@ -3,9 +3,15 @@ import "@/styles/globals.css";
 import { Footer } from "@/components/layout/Footer";
 import { Nav } from "@/components/layout/Nav";
 import { SkipLink } from "@/components/layout/SkipLink";
+import { Cursor } from "@/components/motion/Cursor";
+import { InlineScript } from "@/components/motion/InlineScript";
+import { TransitionProvider } from "@/components/motion/PageTransition";
+import { Preloader } from "@/components/motion/Preloader";
+import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { brand } from "@/content/brand";
 import { home } from "@/content/site";
 import { poppins } from "@/lib/fonts";
+import { preloadScript } from "@/lib/preload";
 import { siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -25,14 +31,23 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={poppins.variable}>
+    // The head script may add data-preload before hydration.
+    <html lang="en" className={poppins.variable} suppressHydrationWarning>
+      <head>
+        <InlineScript html={preloadScript} />
+      </head>
       <body>
-        <SkipLink />
-        <Nav />
-        <main id="content" tabIndex={-1} className="outline-none">
-          {children}
-        </main>
-        <Footer />
+        <TransitionProvider>
+          <SkipLink />
+          <Nav />
+          <main id="content" tabIndex={-1} className="outline-none">
+            {children}
+          </main>
+          <Footer />
+        </TransitionProvider>
+        <SmoothScroll />
+        <Cursor />
+        <Preloader />
       </body>
     </html>
   );

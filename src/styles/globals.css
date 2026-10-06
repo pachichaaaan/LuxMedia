@@ -340,3 +340,180 @@
     opacity: 0;
   }
 }
+
+/* Global systems ---------------------------------------------------------- */
+
+@layer components {
+  /* Nav: transparent at the top, the surface's own color once scrolled. */
+  .site-header {
+    background-color: transparent;
+    transition: transform 0.6s var(--ease-power3-in-out);
+  }
+
+  .site-header[data-at-top="false"] {
+    background-color: var(--nav-bg, var(--bg));
+  }
+
+  .site-header[data-hidden="true"]:not(:focus-within) {
+    transform: translateY(-100%);
+  }
+
+  /* Mobile menu: wipes up like the next story. Hidden menus leave the a11y tree. */
+  .mobile-menu {
+    clip-path: inset(100% 0 0 0);
+    visibility: hidden;
+    transition:
+      clip-path 0.6s var(--ease-power3-in-out),
+      visibility 0s linear 0.6s;
+  }
+
+  .mobile-menu[data-open="true"] {
+    clip-path: inset(0 0 0 0);
+    visibility: visible;
+    transition:
+      clip-path 0.6s var(--ease-power3-in-out),
+      visibility 0s linear 0s;
+  }
+
+  html[data-transitioning] .transition-panel {
+    pointer-events: auto;
+  }
+
+  /* Preloader: only exists when the head script marks <html>. */
+  .preloader {
+    display: none;
+  }
+
+  html[data-preload] {
+    overflow: hidden;
+    animation: preload-unlock 0s linear 2.5s forwards;
+  }
+
+  html[data-preload] .preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    background-color: var(--color-midnight);
+    animation: preload-failsafe 0s linear 2.5s forwards;
+  }
+
+  .preloader-red {
+    position: absolute;
+    inset: 0;
+    background-color: var(--color-badge);
+    clip-path: circle(48px at 50% 50%);
+  }
+
+  .preloader-count {
+    position: relative;
+    color: var(--color-midnight);
+  }
+
+  /* Cursor: solid, surface-aware colors. Never a blend mode. */
+  .cursor {
+    position: fixed;
+    inset: 0 auto auto 0;
+    z-index: 90;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .cursor[data-visible="true"] {
+    opacity: 1;
+  }
+
+  .cursor-dot,
+  .cursor-ring-pos {
+    position: absolute;
+    top: 0;
+    left: 0;
+    will-change: transform;
+  }
+
+  .cursor-dot {
+    width: 6px;
+    height: 6px;
+    margin: -3px 0 0 -3px;
+    border-radius: 9999px;
+    background-color: var(--fg);
+  }
+
+  .cursor-ring {
+    width: 36px;
+    height: 36px;
+    margin: -18px 0 0 -18px;
+    border: 1.5px solid var(--fg);
+    border-radius: 9999px;
+    transition:
+      transform 0.6s var(--ease-expo-out),
+      background-color 0.3s;
+  }
+
+  .cursor-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    translate: -50% -50%;
+    color: var(--bg);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .cursor[data-label="true"] .cursor-ring {
+    transform: scale(2.4);
+    background-color: var(--fg);
+  }
+
+  .cursor[data-label="true"] .cursor-label {
+    opacity: 1;
+  }
+
+  .cursor[data-label="true"] .cursor-dot {
+    opacity: 0;
+  }
+
+  html.cursor-on,
+  html.cursor-on * {
+    cursor: none !important;
+  }
+
+  html.cursor-on :is(input, textarea, select, [contenteditable="true"]) {
+    cursor: auto !important;
+  }
+}
+
+@keyframes preload-unlock {
+  to {
+    overflow: visible;
+  }
+}
+
+@keyframes preload-failsafe {
+  to {
+    visibility: hidden;
+  }
+}
+
+/* Story frame ------------------------------------------------------------- */
+
+@layer components {
+  .story-segment {
+    position: relative;
+    height: 3px;
+    flex: 1 1 0;
+    overflow: hidden;
+    background-color: color-mix(in srgb, currentColor 35%, transparent);
+  }
+
+  .story-segment-fill {
+    position: absolute;
+    inset: 0;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+}
