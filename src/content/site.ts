@@ -37,6 +37,8 @@ export const home = {
   hero: {
     live: "Posting now",
     feedLabel: "Posts going out now for our clients",
+    pause: "Pause feed",
+    play: "Play feed",
     feed: [
       {
         handle: "hearthandcrumb",
@@ -111,6 +113,10 @@ export const home = {
   },
   clients: {
     heading: "Brands we post for",
+    pause: "Pause",
+    play: "Play",
+    pauseLabel: "Pause the scrolling client names",
+    playLabel: "Play the scrolling client names",
   },
   process: {
     heading: "Four steps, repeated every month.",

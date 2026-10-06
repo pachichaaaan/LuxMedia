@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { gsap, type SplitText } from "@/lib/gsap";
-import { INTRO_DONE, INTRO_FLAG } from "@/lib/preload";
-import { splitForReveal } from "@/lib/reveal";
+import { gsap } from "@/lib/gsap";
+import { INTRO_DONE, INTRO_FLAG, REVEAL_HERO, type RevealHeroDetail } from "@/lib/preload";
 import { getLenis } from "@/lib/scroll";
 
 /** Matches `.preloader-red` in globals.css. */
@@ -56,7 +55,6 @@ export function Preloader() {
       return animation;
     };
 
-    let split: SplitText | null = null;
     const finish = () => {
       html.removeAttribute("data-preload");
       getLenis()?.start();
@@ -66,8 +64,6 @@ export function Preloader() {
     const abort = () => {
       cancelled = true;
       tweens.forEach((tween) => tween.kill());
-      split?.revert();
-      split = null;
       finish();
     };
     const late = () => performance.now() / 1000 > HARD_CAP + 0.3;
@@ -119,24 +115,9 @@ export function Preloader() {
       // Fully red: swap shapes invisibly, park the headline, then wipe.
       root.style.backgroundColor = "transparent";
       gsap.set(red, { clipPath: "inset(0% 0% 0% 0%)" });
-      const title = document.querySelector<HTMLElement>("[data-hero-title]");
-      if (title) {
-        const lines = splitForReveal(title);
-        split = lines;
-        track(
-          gsap.to(lines.lines, {
-            yPercent: 0,
-            duration: 0.9,
-            stagger: 0.08,
-            ease: "expo.out",
-            delay: phase * 0.35,
-            onComplete: () => {
-              lines.revert();
-              split = null;
-            },
-          }),
-        );
-      }
+      window.dispatchEvent(
+        new CustomEvent<RevealHeroDetail>(REVEAL_HERO, { detail: { delay: phase * 0.35 } }),
+      );
       await track(
         gsap.to(red, { clipPath: "inset(0% 0% 100% 0%)", duration: phase, ease: "power3.inOut" }),
       );
@@ -149,7 +130,6 @@ export function Preloader() {
       cancelled = true;
       document.removeEventListener("visibilitychange", onVisibility);
       tweens.forEach((tween) => tween.kill());
-      split?.revert();
       if (html.hasAttribute("data-preload")) pendingFinish = setTimeout(finish, 50);
     };
   }, []);

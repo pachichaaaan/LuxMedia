@@ -3,7 +3,7 @@ import { TransitionLink } from "@/components/motion/TransitionLink";
 import { cn } from "@/lib/utils";
 
 type Variant = "primary" | "secondary";
-type Size = "md" | "lg";
+type Size = "md" | "lg" | "xl";
 
 type Common = {
   variant?: Variant;
@@ -39,6 +39,8 @@ const variants: Record<Variant, string> = {
 const sizes: Record<Size, string> = {
   md: "text-body min-h-14 px-7",
   lg: "text-h3 min-h-20 px-10 lg:min-h-26 lg:px-14",
+  // The closing ask: giant on desktop, still thumb-sized on phones.
+  xl: "text-h3 min-h-20 px-10 md:min-h-24 md:px-12 lg:text-h2 lg:min-h-[2.1em] lg:px-[0.85em]",
 };
 
 /** Pill button. Renders a link when given `href`, otherwise a native button. */

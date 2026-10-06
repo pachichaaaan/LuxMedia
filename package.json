@@ -11,7 +11,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "media:manifest": "tsx scripts/media-manifest.ts",
-    "check": "npm run lint && npm run typecheck && npm run build"
+    "check": "npm run lint && npm run typecheck && npm run build",
+    "screenshots": "node scripts/screenshots.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

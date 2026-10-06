@@ -326,7 +326,8 @@
     inset: 0;
     border-radius: inherit;
     background-color: inherit;
-    animation: live-pulse 1.6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    /* Three pulses, then still: under WCAG 2.2.2's five-second limit. */
+    animation: live-pulse 1.6s cubic-bezier(0.16, 1, 0.3, 1) 3;
   }
 }
 
@@ -515,5 +516,509 @@
     background-color: currentColor;
     transform: scaleX(0);
     transform-origin: left center;
+  }
+}
+
+/*
+ * Story --------------------------------------------------------------------
+ * List mode (no JS, reduced motion) is plain Tailwind markup. The staged
+ * modes below are unlayered on purpose: they must beat those utilities, and
+ * only apply once the head script has marked <html data-js>.
+ */
+
+.story-chrome,
+.story-backplate {
+  display: none;
+}
+
+.story-unread {
+  display: inline-block;
+  min-width: 1.75em;
+  padding: 0.05em 0.5em;
+  border-radius: 9999px;
+  background-color: var(--color-badge);
+  color: var(--color-midnight);
+  text-align: center;
+}
+
+.story-unread[hidden] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-js] .story-stage {
+    position: relative;
+    display: grid;
+  }
+
+  html[data-js] .story-chapter {
+    display: contents;
+  }
+
+  html[data-js] .story-year {
+    display: none;
+  }
+
+  html[data-js] .story-chrome {
+    display: block;
+  }
+
+  html[data-js] .story-visual {
+    opacity: 0;
+  }
+
+  html[data-js] .story-visual[data-active],
+  html[data-js] .story:not([data-ready]) [data-chapter="0"] .story-visual {
+    opacity: 1;
+  }
+
+  html[data-js] .story:not([data-ready]) [data-chapter]:not([data-chapter="0"]) .story-title,
+  html[data-js] .story:not([data-ready]) [data-chapter]:not([data-chapter="0"]) .story-body {
+    visibility: hidden;
+  }
+
+  html[data-js] .story-title,
+  html[data-js] .story-body {
+    margin: 0;
+  }
+
+  html[data-js] .story-segments {
+    display: flex;
+    gap: 4px;
+  }
+
+  html[data-js] .story-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  html[data-js] .story-prev,
+  html[data-js] .story-next {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 3;
+    cursor: pointer;
+  }
+
+  html[data-js] .story-prev {
+    left: 0;
+  }
+
+  html[data-js] .story-next {
+    right: 0;
+  }
+}
+
+/* Pinned stage, tablet: frame on the left, text stacked on the right. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
+  html[data-js] .story {
+    --frame-w: min(calc(82svh * 9 / 16), 44vw);
+  }
+
+  html[data-js] .story-stage {
+    height: 100svh;
+    grid-template-columns: var(--frame-w) minmax(0, 1fr);
+    grid-template-rows: 1fr auto auto 1fr;
+    grid-template-areas:
+      "frame ."
+      "frame title"
+      "frame body"
+      "frame .";
+    column-gap: clamp(2rem, 5vw, 5rem);
+    row-gap: 2rem;
+    align-items: center;
+    padding-inline: var(--page-margin);
+  }
+
+  html[data-js] .story-visual,
+  html[data-js] .story-backplate,
+  html[data-js] .story-chrome {
+    grid-area: frame;
+    width: var(--frame-w);
+    align-self: center;
+  }
+
+  html[data-js] .story-backplate,
+  html[data-js] .story-chrome {
+    aspect-ratio: 9 / 16;
+  }
+
+  html[data-js] .story-backplate {
+    display: block;
+    border-radius: 28px;
+    box-shadow: var(--shadow-story);
+  }
+
+  html[data-js] .story-chrome {
+    position: relative;
+    z-index: 2;
+    color: var(--color-screenlight);
+  }
+
+  html[data-js]
+    .story-chrome:is([data-tone="lilac"], [data-tone="haze"], [data-tone="screenlight"]) {
+    color: var(--color-midnight);
+  }
+
+  html[data-js] .story-segments {
+    position: absolute;
+    inset: 12px 12px auto;
+  }
+
+  html[data-js] .story-meta {
+    position: absolute;
+    inset: 26px 16px auto;
+  }
+
+  html[data-js] .story-prev,
+  html[data-js] .story-next {
+    width: 50%;
+    border-radius: 28px;
+  }
+
+  html[data-js] .story-title {
+    grid-area: title;
+    align-self: end;
+  }
+
+  html[data-js] .story-body {
+    grid-area: body;
+    align-self: start;
+  }
+}
+
+/* Pinned stage, wide: title | centered frame | body. The frame narrows so the
+   longest title word ("platform,", about 4.5em) always fits beside it. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 1280px) {
+  html[data-js] .story {
+    --frame-w: min(
+      calc(82svh * 9 / 16),
+      calc(100vw - 2 * var(--page-margin) - 4rem - 9.2 * clamp(2.75rem, 7vw, 7.5rem))
+    );
+  }
+
+  html[data-js] .story-stage {
+    grid-template-columns: minmax(0, 1fr) var(--frame-w) minmax(0, 1fr);
+    grid-template-rows: 1fr;
+    grid-template-areas: "title frame body";
+    column-gap: 2rem;
+  }
+
+  html[data-js] .story-title {
+    align-self: center;
+  }
+
+  html[data-js] .story-body {
+    align-self: end;
+    max-width: 30ch;
+    margin-bottom: calc((100svh - var(--frame-w) * 16 / 9) / 2);
+  }
+}
+
+/* Viewer, phones: the screen is the frame. */
+@media (prefers-reduced-motion: no-preference) and (max-width: 767.98px) {
+  html[data-js] .story {
+    height: 100svh;
+    min-height: 34rem;
+  }
+
+  html[data-js] .story-stage {
+    height: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    grid-template-areas: "chrome" "visual" "title" "body";
+    row-gap: 1rem;
+    padding: 1rem var(--page-margin) 1.75rem;
+    touch-action: pan-y;
+  }
+
+  html[data-js] .story-chrome {
+    grid-area: chrome;
+    display: grid;
+    gap: 0.75rem;
+    color: var(--fg);
+  }
+
+  html[data-js] .story-visual {
+    grid-area: visual;
+    min-height: 0;
+    margin-inline: calc(-1 * var(--page-margin));
+  }
+
+  html[data-js] .story-visual > * {
+    height: 100%;
+    aspect-ratio: auto !important;
+    border-radius: 0;
+  }
+
+  html[data-js] .story-title {
+    grid-area: title;
+    font-size: var(--text-h2);
+    line-height: var(--text-h2--line-height);
+  }
+
+  html[data-js] .story-body {
+    grid-area: body;
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+
+  html[data-js] .story-prev {
+    width: 33.333%;
+  }
+
+  html[data-js] .story-next {
+    width: 66.667%;
+  }
+}
+
+/* Pause controls exist only when there is motion to pause. */
+html:not([data-js]) .feed-toggle,
+html:not([data-js]) .marquee-toggle {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feed-toggle,
+  .marquee-toggle {
+    display: none;
+  }
+}
+
+/* Services list ------------------------------------------------------------ */
+
+@layer components {
+  .service-row .service-name {
+    transform: translateY(0.28em);
+    transition: transform 0.6s var(--ease-expo-out);
+  }
+
+  .service-row .service-line {
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 0.6s var(--ease-expo-out);
+  }
+
+  .service-row:hover .service-name,
+  .service-row:focus-visible .service-name {
+    transform: none;
+  }
+
+  .service-row:hover .service-line,
+  .service-row:focus-visible .service-line {
+    clip-path: inset(0 0 0 0);
+  }
+
+  /* Touch screens can't hover: show every line. */
+  @media (hover: none) {
+    .service-row .service-name {
+      transform: none;
+    }
+
+    .service-row .service-line {
+      clip-path: none;
+    }
+  }
+
+  .service-preview {
+    clip-path: inset(100% 0 0 0);
+    transition: clip-path 0.6s var(--ease-expo-out);
+  }
+
+  .service-preview[data-visible="true"] {
+    clip-path: inset(0 0 0 0);
+  }
+
+  .service-preview-item {
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+  }
+
+  .service-preview-item[data-active] {
+    visibility: visible;
+  }
+}
+
+/*
+ * Work rail -----------------------------------------------------------------
+ * Base: native horizontal swipe with snap (phones, tablets, no JS).
+ * Desktop with motion: pinned, overflow clipped, translated by scroll.
+ * Desktop with reduced motion: a static grid.
+ */
+
+.work-viewport {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--page-margin);
+  scrollbar-width: none;
+  padding-bottom: 6rem;
+}
+
+.work-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.work-track {
+  --row: calc(62vw * 16 / 9);
+  display: flex;
+  width: max-content;
+  gap: 1.25rem;
+  padding-inline: var(--page-margin);
+}
+
+.work-item {
+  flex: none;
+  width: var(--w);
+  scroll-snap-align: start;
+}
+
+.work-item[data-ratio="9:16"] {
+  --w: 62vw;
+}
+
+.work-item[data-ratio="4:5"],
+.work-item[data-ratio="1:1"] {
+  --w: 74vw;
+}
+
+.work-item[data-ratio="16:9"] {
+  --w: 86vw;
+}
+
+.work-item-end {
+  --w: auto;
+  padding-right: var(--page-margin);
+}
+
+/* Every media box sits on the same baseline, so captions line up. */
+.work-media-row {
+  display: flex;
+  height: var(--row);
+  align-items: flex-end;
+}
+
+.work-media {
+  width: 100%;
+}
+
+.work-media > * {
+  transition: transform 0.6s var(--ease-expo-out);
+}
+
+.work-link:hover .work-media > *,
+.work-link:focus-visible .work-media > * {
+  transform: scale(1.03);
+}
+
+.work-rail[data-gl] .work-link:hover .work-media > * {
+  transform: none;
+}
+
+@media (min-width: 1024px) {
+  .work-track {
+    --row: 56svh;
+    gap: clamp(2rem, 3vw, 3.5rem);
+  }
+
+  .work-item[data-ratio="9:16"] {
+    --w: calc(56svh * 9 / 16);
+  }
+
+  .work-item[data-ratio="4:5"] {
+    --w: calc(46svh * 4 / 5);
+  }
+
+  .work-item[data-ratio="1:1"] {
+    --w: 38svh;
+  }
+
+  .work-item[data-ratio="16:9"] {
+    --w: calc(36svh * 16 / 9);
+  }
+
+  .work-item-end {
+    --w: auto;
+  }
+}
+
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  html[data-js] .work-stage {
+    display: flex;
+    height: 100svh;
+    flex-direction: column;
+  }
+
+  html[data-js] .work-viewport {
+    flex: 1;
+    overflow: clip;
+    padding-bottom: 0;
+    scroll-snap-type: none;
+  }
+
+  html[data-js] .work-track {
+    will-change: transform;
+  }
+
+  .work-rail[data-dragging] .work-link {
+    pointer-events: none;
+  }
+}
+
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+  .work-viewport {
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
+  .work-track {
+    display: grid;
+    width: auto;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: end;
+    row-gap: 4rem;
+  }
+
+  .work-item,
+  .work-item[data-ratio] {
+    --w: auto;
+  }
+
+  .work-media-row {
+    height: auto;
+  }
+}
+
+/* Marquee: a static wrapped row without JS or under reduced motion. */
+html:not([data-js]) .marquee,
+html:not([data-js]) .marquee-track {
+  width: auto;
+  flex-wrap: wrap;
+}
+
+html:not([data-js]) .marquee {
+  padding-inline: var(--page-margin);
+}
+
+html:not([data-js]) .marquee-clone {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee,
+  .marquee-track {
+    width: auto;
+    flex-wrap: wrap;
+  }
+
+  .marquee {
+    padding-inline: var(--page-margin);
+  }
+
+  .marquee-clone {
+    display: none;
   }
 }

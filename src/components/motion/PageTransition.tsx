@@ -12,6 +12,7 @@ import {
 } from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/motion";
+import { REVEAL_HERO, type RevealHeroDetail } from "@/lib/preload";
 import { splitForReveal } from "@/lib/reveal";
 import { getLenis } from "@/lib/scroll";
 
@@ -71,6 +72,11 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
       { clipPath: COVERED },
       { clipPath: ABOVE, duration: PHASE, ease: "power3.inOut", onComplete: finish },
     );
+    if (document.querySelector("main [data-hero-title]")) {
+      window.dispatchEvent(
+        new CustomEvent<RevealHeroDetail>(REVEAL_HERO, { detail: { delay: 0.12 } }),
+      );
+    }
     const title = document.querySelector<HTMLElement>("main [data-page-title]");
     if (title) {
       const split = splitForReveal(title);
