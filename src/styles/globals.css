@@ -1022,3 +1022,123 @@ html:not([data-js]) .marquee-clone {
     display: none;
   }
 }
+
+/* Team: hover swaps the role for the person's local time. Touch shows both. */
+@layer components {
+  .team-meta {
+    display: grid;
+  }
+
+  .team-role,
+  .team-time {
+    grid-area: 1 / 1;
+    transition: opacity 0.6s var(--ease-expo-out);
+  }
+
+  .team-time {
+    opacity: 0;
+  }
+
+  @media (hover: hover) {
+    .team-card:hover .team-role {
+      opacity: 0;
+    }
+
+    .team-card:hover .team-time {
+      opacity: 1;
+    }
+  }
+
+  @media (hover: none) {
+    .team-role,
+    .team-time {
+      grid-area: auto;
+    }
+
+    .team-time {
+      opacity: 1;
+    }
+  }
+}
+
+/* Case links: the only hover is the cover easing in. */
+@layer components {
+  .case-link-media {
+    transition: transform 0.6s var(--ease-expo-out);
+  }
+
+  .case-link:hover .case-link-media,
+  .case-link:focus-visible .case-link-media {
+    transform: scale(1.03);
+  }
+}
+
+/* Chips: outlined at rest, filled with the surface accent when pressed. */
+@layer components {
+  .chip {
+    border-color: color-mix(in srgb, var(--fg) 35%, transparent);
+    color: var(--fg);
+  }
+
+  .chip:hover {
+    border-color: var(--fg);
+  }
+
+  .chip[aria-pressed="true"] {
+    border-color: var(--accent);
+    background-color: var(--accent);
+    color: var(--bg);
+  }
+}
+
+/* Next case study: the cover rises in on hover; touch screens just show it. */
+@layer components {
+  .next-case-preview {
+    align-self: end;
+    clip-path: inset(100% 0 0 0);
+    transition: clip-path 0.6s var(--ease-expo-out);
+  }
+
+  .next-case:hover .next-case-preview,
+  .next-case:focus-visible .next-case-preview {
+    clip-path: inset(0 0 0 0);
+  }
+
+  @media (hover: none) {
+    .next-case-preview {
+      clip-path: none;
+    }
+  }
+}
+
+/* Form choices: native checkboxes and radios, dressed as pills. */
+@layer components {
+  .choice {
+    position: relative;
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    padding-inline: 1.25rem;
+    border: 2px solid color-mix(in srgb, var(--fg) 35%, transparent);
+    border-radius: 9999px;
+    color: var(--fg);
+    font-size: var(--text-small);
+    line-height: var(--text-small--line-height);
+    cursor: pointer;
+  }
+
+  .choice:hover {
+    border-color: var(--fg);
+  }
+
+  .choice:has(input:checked) {
+    border-color: var(--accent);
+    background-color: var(--accent);
+    color: var(--bg);
+  }
+
+  .choice:has(input:focus-visible) {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
