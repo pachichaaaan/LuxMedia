@@ -16,7 +16,7 @@ function Avatar({ name, tone }: { name: string; tone: "haze" | "lilac" | "midnig
 function Comment({ testimonial }: { testimonial: Testimonial }) {
   return (
     <li className="flex gap-4 md:gap-5">
-      <Avatar name={testimonial.name} tone="haze" />
+      <Avatar name={testimonial.name} tone="lilac" />
       <figure className="min-w-0 flex-1">
         <figcaption>
           <p className="flex flex-wrap items-baseline gap-x-3">

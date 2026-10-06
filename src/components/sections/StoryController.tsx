@@ -103,7 +103,8 @@ function setup(section: HTMLElement, mode: Mode) {
 
     // Inside the frame: a hard cut, the way Stories do it.
     visuals.forEach((visual, i) => visual?.toggleAttribute("data-active", i === index));
-    chrome.dataset.tone = chapter.visual.tone;
+    // Over a real photo the chrome sits on a midnight scrim, so it reads as light ink.
+    chrome.dataset.tone = chapter.visual.src ? "midnight" : chapter.visual.tone;
     year.textContent = chapter.year;
     unread.hidden = index !== UNREAD_INDEX;
 

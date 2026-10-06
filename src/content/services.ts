@@ -177,7 +177,7 @@ export const services: Service[] = [
       "Decisions made on numbers, not hunches",
       "A clear line from social to revenue",
     ],
-    relatedCase: "kilo-skincare",
+    relatedCase: "bramble-books",
     preview: {
       id: "service-reporting",
       ratio: "9:16",

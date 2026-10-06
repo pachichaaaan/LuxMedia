@@ -1,6 +1,6 @@
-# The Lux Expo: design plan
+# The Lux Expo: design
 
-Phase 0 deliverable, written before any code. This is the reference for tokens, layout, motion, and components. It gets updated at the end of the build to match what shipped.
+Written as the Phase 0 plan before any code, then updated after the build to match what shipped. Where the build departs from the plan, §10 says what changed and why. §11 is the QA log.
 
 ---
 
@@ -180,7 +180,7 @@ Rules:
 
 ### 2.6 Layout
 
-- **Grid.** 4 columns under 768px, 8 columns from 768 to 1023px, and 12 columns from 1024px. Gutters are 16px on mobile and 24px from 768px. Page margin is `clamp(20px, 4vw, 64px)`.
+- **Grid.** 4 columns under 768px, 8 columns from 768 to 1023px, and 12 columns from 1024px. (The Story uses its own stage: frame-left from 768px, three zones from 1280px.) Gutters are 16px on mobile and 24px from 768px. Page margin is `clamp(20px, 4vw, 64px)`.
 - **Test widths.** 375, 768, 1024, 1440, 1920.
 - **Radius.** 28px on 9:16 media frames, full pill on buttons, chips, and radio pills. Circles are reserved for two signals, the notification badge and the cursor, and are never used as containers. Everything else is square, including avatars, inputs, and 4:5, 1:1, and 16:9 media.
 - **Shadow.** Exactly one, `--shadow-story`, under the Story frame.
@@ -240,7 +240,7 @@ hero media.                the viewport.              rise, 0.08s apart.
 
 - Headline: `display`, columns 1 to 8, from `brand.tagline`. Nav: `body` size. Contact carries the only badge dot in the nav, the "unread" signal.
 - Frame: columns 10 to 12, about 62vh tall, tone dusk. Four posts stack vertically inside. Each has a client handle top-left, the placeholder label centered, and a one-line caption at the bottom.
-- Bottom row: descriptor in `body-lg` at 78%, and the live row: pulsing badge dot, "Posting now", HQ time in `small`, all in `tabular-nums`.
+- Bottom row: descriptor in `body-lg` at 78%, and the live row under the frame: badge dot (three pulses, then still), "Posting now", HQ time in `small` `tabular-nums`, and a "Pause feed" control. Moving content that runs longer than 5 seconds needs a way to stop it (WCAG 2.2.2).
 - There's no "Scroll to explore" cue, because the advancing feed already tells you the page is live.
 
 ### 3.3 Hero, mobile
@@ -299,7 +299,7 @@ hero media.                the viewport.              rise, 0.08s apart.
 
 - "Menu" and "Close" are text buttons, not icons. Links are set at `h1`. The panel is a full-screen night overlay with a focus trap, Esc to close, Lenis stopped for scroll lock, and focus returned to "Menu" on close.
 
-### 3.5 The story (signature), desktop ≥1024px
+### 3.5 The story (signature), desktop 1280px and up
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐
@@ -333,7 +333,7 @@ hero media.                the viewport.              rise, 0.08s apart.
   - An `aria-live="polite"` region announces "Chapter 3 of 6: Building the system", debounced 300ms so fast scrolling doesn't queue six announcements.
 - **Heading.** The section `h2` ("Our story, 2015 to today") is visually hidden, because the frame makes the section's purpose obvious. Chapter titles are `h3` set at `h1` size.
 
-### 3.6 The story, tablet 768 to 1023px
+### 3.6 The story, tablet and small laptop, 768 to 1279px
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐
@@ -355,7 +355,7 @@ hero media.                the viewport.              rise, 0.08s apart.
 └────────────────────────────────────────────────────────────────────────────┘
 ```
 
-- At these widths a three-zone layout leaves about 150px for each text column. So the frame takes columns 1 to 3 of 8, and the title and copy stack in columns 4 to 8. It's still pinned and works the same way.
+- Below 1280px a three-zone layout can't fit the longest title words (about 4.5em at `h1`) beside the frame. So the frame sits left at `min(82svh × 9/16, 44vw)`, and the title and copy stack on the right. It's still pinned and works the same way.
 
 ### 3.7 The story, mobile under 768px (native viewer, not pinned)
 
@@ -391,6 +391,7 @@ hero media.                the viewport.              rise, 0.08s apart.
 - The viewer is 100svh, and the phone screen is the frame, so the visual inside is square-cornered and edge to edge.
 - **Gestures.** Tap the left third to go back and the right two-thirds to advance, the platform convention. Horizontal swipe also works. `touch-action: pan-y` keeps vertical page scroll working through the viewer.
 - **No auto-advance.** On tap, the current segment fills over 0.6s.
+- **Type.** Titles drop to `h2` size here so the visual keeps most of the screen.
 - **Background.** Tweens through the same six stops with the same contrast guard.
 - **Keyboard.** The tap zones are the same two buttons as on desktop, so keyboard and switch users get identical controls.
 
@@ -444,7 +445,7 @@ hero media.                the viewport.              rise, 0.08s apart.
 
 - The heading is a real sentence, an `h2` set at `h3` size. It sits above a full-width list of six links at `h2` size, separated by rules. There's no numbering, because services aren't a sequence, and no arrows.
 - **Hover or focus opens the row.** Each row reserves space for its one-line description, so opening it is a `clip-path` reveal plus a small `translateY` on the name. Nothing reflows.
-- **Preview frame.** A single 9:16 preview, about 200×356px, follows the cursor (lerped). Its content hard-cuts between rows, Stories logic again.
+- **Preview frame.** A single 9:16 preview, 200×356px. It follows the pointer vertically and drifts only within the right third horizontally, so it never covers the name it previews. Its content hard-cuts between rows, Stories logic again.
 - **Keyboard.** On keyboard focus the preview pins to the right end of the row instead of following.
 - Each row links to `/services#<slug>`.
 
@@ -570,7 +571,7 @@ hero media.                the viewport.              rise, 0.08s apart.
 └────────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **Avatars.** Square, because of the radius rule, with a haze or lilac fill and midnight initials.
+- **Avatars.** Square, because of the radius rule, with a lilac fill and midnight initials (7.29:1). The team's reply uses midnight.
 - **Comment layout.** Name, then the timestamp separated by space (no middle dot), then the role on its own line in meta. The comment is `body-lg` at 78%. The like count is written out as text ("1,204 likes"), with no heart icon, because hearts belong to specific platforms.
 - **The brand's reply.** One short reply from the team, indented with a structural thread rule. It shows the 24/7 desk in the brand's own voice.
 - Static, with no carousel.
@@ -586,7 +587,7 @@ hero media.                the viewport.              rise, 0.08s apart.
 ```
 
 - Fictional wordmarks in Poppins Bold at `h2` in dusk on day (4.67:1). They're separated by space only, with no stars or dots.
-- **Motion.** Linear. Base speed is one loop per 40s. Lenis velocity multiplies it up to 4×, and its sign sets direction. Hovering pauses it.
+- **Motion.** Linear. Base speed is one loop per 40s. Scroll velocity multiplies it up to 4×, and scroll direction sets which way it runs. Hovering pauses it, and a small "Pause" control below stops it (WCAG 2.2.2).
 - **Accessibility.** The visually hidden `h2` is "Brands we post for". The list is read once, and the cloned loop copy is `aria-hidden`.
 - **Reduced motion.** A static wrapped row, with no clones.
 
@@ -636,7 +637,7 @@ hero media.                the viewport.              rise, 0.08s apart.
 ```
 
 - **Statement.** `display` size, bookending the hero.
-- **CTA.** A badge-red pill with a midnight label at `h3` size, about 104px tall on desktop, and magnetic.
+- **CTA.** A badge-red pill with a midnight label, `h3` on phones and `h2` on desktop (about 2.1em tall), and magnetic.
 - **Beside the CTA.** The email link and a live line: "It's 02:14 at HQ. We're posting."
 - **Footer.** Small and quiet, with no giant wordmark. Social links are text labels. The © year is computed at render.
 
@@ -671,9 +672,9 @@ hero media.                the viewport.              rise, 0.08s apart.
 | Page           | Surfaces                                        | Structure                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | -------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/about`       | night hero, then day, haze, day                 | **Hero:** "Ten years on the night shift." at `display` (see open question 5). **Extended story:** long-form chapters, with the year in a left column (the year is information, so it isn't a decorative label). **Values:** three plain statements at `h2`, unnumbered, no icons. **Team grid:** 12 people, 4 columns on desktop and 2 on mobile, 4:5 square-cornered MediaSlot, name, and role. Hover or focus swaps the role for their local time ("4:12pm in Lisbon"). On touch, local time sits under the role. **Careers teaser** links to an email address. |
-| `/services`    | night hero, day sections, haze process, day FAQ | **Hero:** h1 with in-page links to the six services. **Each service section:** `h2`, description, "What's included", "Typical outcomes", and a related case study link (MediaSlot plus result line). **Process:** the shared component. **FAQ:** six questions with `Disclosure`.                                                                                                                                                                                                                                                                                 |
+| `/services`    | night hero, day sections, haze process, day FAQ | **Hero:** h1 with in-page links to the six services. **Each service section:** `h2`, description, "What's included", "Typical outcomes", and a related case study link (MediaSlot plus result line). **Process:** the shared component. **FAQ:** six questions with `Disclosure`. No closing CTA (cut in the restraint pass, §11).                                                                                                                                                                                                                                |
 | `/work`        | night                                           | **Header:** h1 and filter chips (`aria-pressed`) synced to `?service=`. **Grid:** a 12-column grid with deliberately placed mixed ratios, not auto-masonry. Filtering animates with GSAP Flip. When a filter returns nothing, the page says "No case studies for this service yet. Show all work."                                                                                                                                                                                                                                                                |
-| `/work/[slug]` | night hero and gallery, day body and results    | **Hero:** client, headline result at `h1`, then services, year, and platforms as a `<dl>`. **Body:** challenge, approach, and a mixed-ratio gallery on night. **Results:** three metrics in the big-number treatment, the only big numbers on the site. **Then:** a testimonial and a full-width "Next case study" link with a clip-path hover preview. Pages come from `generateStaticParams` and `generateMetadata`.                                                                                                                                            |
+| `/work/[slug]` | night hero and gallery, day body and results    | **Hero:** client, headline result at `h1`, then services, year, and platforms as a `<dl>`. **Body:** challenge, approach, and a mixed-ratio gallery on night, in balanced columns. **Results:** three metrics in the big-number treatment, the only big numbers on the site. **Then:** a testimonial and a full-width "Next case study" link with a clip-path hover preview. Pages come from `generateStaticParams` and `generateMetadata`.                                                                                                                       |
 | `/contact`     | day                                             | **Left:** "Tell us about your brand.", the email, and the reply promise. **Right:** the form. **Fields:** square-cornered, with a dusk bottom rule (4.67:1) that thickens to 2px midnight on focus. **Errors:** written in midnight, not red, because red is reserved for the badge. They're tied to fields with `aria-describedby`, and an error summary at the top links to each invalid field. **Primary action:** "Send message" in the badge pill.                                                                                                           |
 | `/privacy`     | day                                             | Long-form text, 62ch measure, `h2` per topic.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `not-found`    | night                                           | See 3.17.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
@@ -707,30 +708,30 @@ Words we don't use: _scroll-stopping, elevate, unlock, seamless, next-level, sto
 
 Principles: one orchestrated load moment (the preloader into the hero) and one signature scroll moment (the Story). Everything else moves only when the user does something, or very subtly. Only `transform`, `opacity`, and `clip-path` are animated. Reveals use `expo.out`, transitions use `power3.inOut`, and only the marquee is linear.
 
-| #   | Moment                      | Trigger                                        | What moves                                                                                                            | Timing                                                                                                                                            | Why                                                           | Reduced motion          | Touch, under 768px                  |
-| --- | --------------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ----------------------- | ----------------------------------- |
-| 1   | Preloader count             | First load in a session                        | Badge digits                                                                                                          | Up to 1.6s, eased count, held at 98 until ready                                                                                                   | Sets up "unread" before a word is read. Covers the font swap. | Skipped                 | Same                                |
-| 2   | Preloader expand            | Count reaches 99+                              | Red layer `clip-path: circle()` from badge to viewport                                                                | 0.45s power3.inOut                                                                                                                                | Opening the notification                                      | Skipped                 | Same                                |
-| 3   | Preloader exit, hero reveal | Expand ends                                    | Red layer wipes out the top. Headline lines rise in masks.                                                            | Wipe 0.45s power3.inOut. Lines 0.9s expo.out, 0.08s stagger.                                                                                      | Same gesture as page transitions                              | Static headline         | Same                                |
-| 4   | Hero feed                   | Time, while in view and not hovered            | Post stack `translateY`, one post per step                                                                            | Hold 2.8s, move 0.9s power3.inOut                                                                                                                 | Shows the work happening                                      | First post, static      | Same. Pauses off-screen.            |
-| 5   | Live dot                    | Always                                         | Ring `scale` 1 to 2.4, `opacity` 0.6 to 0                                                                             | 1.6s loop                                                                                                                                         | "Live"                                                        | Static dot              | Same                                |
-| 6   | Hero drift                  | Scroll, scrubbed                               | Lines `yPercent` 0, −6, −12, −18. Frame `scale` 1 to 0.92.                                                            | Scrub 0.6                                                                                                                                         | Depth as you leave                                            | None                    | None                                |
-| 7   | Story progress              | Scroll, scrubbed                               | Segment fill `scaleX`                                                                                                 | Scrubbed                                                                                                                                          | The story advances with you                                   | No segments             | Fill 0.6s expo.out on tap           |
-| 8   | Story chapter change        | Index changes (scroll, click, key, tap, swipe) | Lines mask out (`yPercent` 0 to −100) then in (100 to 0). Background tweens between stops. In-frame visual hard-cuts. | Out 0.45s power3.inOut. Background 0.7s power3.inOut. In 0.9s expo.out starting at 0.4s, 0.08s stagger. Interruptible: a newer change overwrites. | Text appears only over a stop it was checked against          | Static bands            | Same, on tap                        |
-| 9   | Unread counter, chapter 2   | Scroll within chapter 2                        | Badge digits 0 to 300                                                                                                 | Scrubbed                                                                                                                                          | "300 unread messages," literally                              | Shows 300               | Counts once on entry, 1.2s expo.out |
-| 10  | Service row                 | Hover, focus                                   | Description `clip-path` reveal, name `translateY`                                                                     | 0.6s expo.out                                                                                                                                     | Reveals one line, only when asked                             | Instant                 | Accordion, instant                  |
-| 11  | Service preview             | Pointer over list                              | Frame `translate` (lerp 0.12). `clip-path` in and out. Hard cut between rows.                                         | 0.6s expo.out                                                                                                                                     | One preview, following attention                              | Pinned at row end       | Inline in accordion                 |
-| 12  | Work rail                   | Scroll, drag                                   | Track `translateX`                                                                                                    | Scrubbed                                                                                                                                          | Browsing the feed sideways                                    | Static grid             | Native swipe and snap               |
-| 13  | Work hover                  | Hover                                          | Displacement uniform 0 to 1 (WebGL)                                                                                   | 0.8s expo.out in, 0.6s out                                                                                                                        | The image reacts like a thumb on glass                        | CSS scale 1.03, instant | CSS scale on press                  |
-| 14  | Marquee                     | Always, plus scroll velocity                   | Track `xPercent` wrap                                                                                                 | Linear, 40s per loop, up to 4× with velocity, direction follows scroll                                                                            | Wordmarks move with you                                       | Static wrapped row      | Same                                |
-| 15  | Nav                         | Scroll direction                               | `translateY` −100% or 0                                                                                               | 0.6s power3.inOut                                                                                                                                 | Gets out of the way                                           | Always visible          | Same                                |
-| 16  | Cursor                      | Pointer                                        | Dot (lerp 0.35) and ring (lerp 0.15). Ring scales and shows a label on `data-cursor`.                                 | Label 0.6s expo.out                                                                                                                               | Tells you what a click does                                   | Native cursor           | Native cursor                       |
-| 17  | Magnetic                    | Pointer near primary CTAs and nav links        | `translate` up to 30% of the offset                                                                                   | Follow 0.6s expo.out, release 0.8s expo.out                                                                                                       | Primary actions feel within reach                             | Off                     | Off                                 |
-| 18  | Page transition             | Internal link click                            | Midnight panel `clip-path` wipes up, route changes, panel wipes out the top, new h1 lines rise                        | 0.45s + 0.45s power3.inOut, 900ms max. Lines 0.8s expo.out.                                                                                       | Swipe to the next story                                       | Instant swap            | Same                                |
-| 19  | Mobile menu                 | Menu button                                    | Overlay `clip-path` wipe up                                                                                           | 0.6s power3.inOut                                                                                                                                 | Same gesture as transitions                                   | Instant                 | (mobile only)                       |
-| 20  | Work filter                 | Chip toggle                                    | Items via GSAP Flip, `opacity` for leavers                                                                            | 0.6s power3.inOut                                                                                                                                 | You can see where items went                                  | Instant                 | Same                                |
-| 21  | Next case study             | Hover, focus                                   | Preview `clip-path` reveal                                                                                            | 0.6s expo.out                                                                                                                                     | Previews the destination                                      | Instant                 | No preview                          |
-| 22  | Team local time             | Hover, focus                                   | Role and local time `opacity` swap                                                                                    | 0.6s expo.out                                                                                                                                     | "Someone's on, somewhere"                                     | Instant                 | Both visible                        |
+| #   | Moment                      | Trigger                                                 | What moves                                                                                                                                             | Timing                                                                                                                                    | Why                                                           | Reduced motion                  | Touch, under 768px                  |
+| --- | --------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ------------------------------- | ----------------------------------- |
+| 1   | Preloader count             | First load in a session                                 | Badge digits (requestAnimationFrame)                                                                                                                   | Up to 1.4s, power2.out curve, held at 98 until fonts and hero media are ready                                                             | Sets up "unread" before a word is read. Covers the font swap. | Skipped                         | Same                                |
+| 2   | Preloader expand            | Count reaches 99+                                       | Red layer `clip-path: circle()` from badge to viewport (Web Animations API)                                                                            | 0.45s power3.inOut                                                                                                                        | Opening the notification                                      | Skipped                         | Same                                |
+| 3   | Preloader exit, hero reveal | Expand ends                                             | Red layer wipes out the top. Headline lines rise in masks.                                                                                             | Wipe 0.45s power3.inOut. Lines 0.9s expo.out, 0.08s stagger.                                                                              | Same gesture as page transitions                              | Static headline                 | Same                                |
+| 4   | Hero feed                   | Time, while in view, not hovered or focused, not paused | Post stack `translateY`, one post per step                                                                                                             | Hold 2.8s, move 0.9s power3.inOut. "Pause feed" stops it.                                                                                 | Shows the work happening                                      | First post, static, no control  | Same. Pauses off-screen.            |
+| 5   | Live dot                    | On load                                                 | Ring `scale` 1 to 2.4, `opacity` 0.6 to 0                                                                                                              | Three 1.6s pulses, then still (under WCAG 2.2.2's 5s)                                                                                     | "Live"                                                        | Static dot                      | Same                                |
+| 6   | Hero drift                  | Scroll, scrubbed                                        | Line masks `yPercent` 0, −6, −12, −18. Frame `scale` 1 to 0.92.                                                                                        | Scrub 0.6                                                                                                                                 | Depth as you leave                                            | None                            | None                                |
+| 7   | Story progress              | Scroll, scrubbed                                        | Segment fill `scaleX`                                                                                                                                  | Scrubbed                                                                                                                                  | The story advances with you                                   | No segments                     | Fill 0.6s expo.out on tap           |
+| 8   | Story chapter change        | Index changes (scroll, click, key, tap, swipe)          | Lines mask out (`yPercent` 0 to −135) then in (135 to 0). Background tweens between stops. In-frame visual hard-cuts.                                  | Out 0.45s power3.inOut. Background 0.7s power3.inOut. In 0.9s expo.out from 0.4s (0.7s when the ink flips), 0.08s stagger. Interruptible. | Text appears only over a stop it was checked against          | Static bands                    | Same, on tap                        |
+| 9   | Unread counter, chapter 2   | Scroll within chapter 2                                 | Badge digits 0 to 300                                                                                                                                  | Scrubbed                                                                                                                                  | "300 unread messages," literally                              | Hidden (no chrome in list mode) | Counts once on entry, 1.2s expo.out |
+| 10  | Service row                 | Hover, focus                                            | Description `clip-path` reveal, name `translateY`                                                                                                      | 0.6s expo.out                                                                                                                             | Reveals one line, only when asked                             | Instant                         | Accordion, instant                  |
+| 11  | Service preview             | Pointer over list                                       | Frame follows the pointer vertically and drifts within the right third horizontally (quickTo 0.5s). `clip-path` in and out. Hard cut between rows.     | 0.6s expo.out                                                                                                                             | One preview, never covering the type                          | Pinned beside the row           | Inline in accordion                 |
+| 12  | Work rail                   | Scroll, drag                                            | Track `translateX`                                                                                                                                     | Scrubbed                                                                                                                                  | Browsing the feed sideways                                    | Static grid                     | Native swipe and snap               |
+| 13  | Work hover                  | Hover                                                   | Displacement uniform 0 to 1 (WebGL)                                                                                                                    | Damped in about 0.8s, out about 0.6s                                                                                                      | The image reacts like a thumb on glass                        | CSS scale 1.03, instant         | CSS scale on press                  |
+| 14  | Marquee                     | On screen, plus scroll velocity                         | Track `x`, wrapped                                                                                                                                     | Linear, 40s per loop, up to 4× with velocity, direction follows scroll. "Pause" stops it.                                                 | Wordmarks move with you                                       | Static wrapped row, no control  | Same                                |
+| 15  | Nav                         | Scroll direction                                        | `translateY` −100% or 0                                                                                                                                | 0.6s power3.inOut                                                                                                                         | Gets out of the way                                           | Always visible                  | Same                                |
+| 16  | Cursor                      | Pointer                                                 | Dot (lerp 0.35) and ring (lerp 0.15). Ring scales and shows a label on `data-cursor`.                                                                  | Label 0.6s expo.out                                                                                                                       | Tells you what a click does                                   | Native cursor                   | Native cursor                       |
+| 17  | Magnetic                    | Pointer over primary CTAs and nav links                 | `translate` up to 20–30% of the offset                                                                                                                 | Follow and release 0.6s expo.out                                                                                                          | Primary actions feel within reach                             | Off                             | Off                                 |
+| 18  | Page transition             | Internal link click; back and forward                   | Midnight panel `clip-path` wipes up, route changes, panel wipes out the top, new h1 lines rise. Back/forward covers before paint, then plays the exit. | 0.45s + 0.45s power3.inOut, 900ms max. Lines 0.8s expo.out.                                                                               | Swipe to the next story                                       | Instant swap                    | Same                                |
+| 19  | Mobile menu                 | Menu button                                             | Overlay `clip-path` wipe up                                                                                                                            | 0.6s power3.inOut                                                                                                                         | Same gesture as transitions                                   | Instant                         | (mobile only)                       |
+| 20  | Work filter                 | Chip toggle                                             | Items via GSAP Flip, `opacity` for leavers                                                                                                             | 0.6s power3.inOut                                                                                                                         | You can see where items went                                  | Instant                         | Same                                |
+| 21  | Next case study             | Hover, focus                                            | Preview `clip-path` reveal                                                                                                                             | 0.6s expo.out                                                                                                                             | Previews the destination                                      | Instant                         | Preview always shown                |
+| 22  | Team local time             | Hover                                                   | Role and local time `opacity` swap                                                                                                                     | 0.6s expo.out                                                                                                                             | "Someone's on, somewhere"                                     | Instant                         | Both shown, stacked                 |
 
 **Deliberately still:** every section heading (no entrance animations), comments, process, footer, privacy, case study body copy, and inner-page h1s on a direct load. They animate only after a page transition.
 
@@ -740,130 +741,98 @@ Principles: one orchestrated load moment (the preloader into the hero) and one s
 
 ## 7. Component inventory
 
-| Component                     | Path                                   | Runtime                | Notes                                                                                                     |
-| ----------------------------- | -------------------------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------- |
-| Nav                           | `components/layout/Nav.tsx`            | client                 | Hide and show from Lenis direction. Surface-aware. Contact badge dot. Links are magnetic.                 |
-| MobileMenu                    | `components/layout/MobileMenu.tsx`     | client                 | Focus trap, Esc to close, `lenis.stop()`, focus restore                                                   |
-| Footer                        | `components/layout/Footer.tsx`         | server                 | Nav, social text links, privacy, © year                                                                   |
-| SkipLink                      | `components/layout/SkipLink.tsx`       | server                 | "Skip to content", first focusable element                                                                |
-| SmoothScroll                  | `components/motion/SmoothScroll.tsx`   | client                 | Lenis instance and context, GSAP ticker, ScrollTrigger sync, refresh after fonts and routes, anchor links |
-| Cursor                        | `components/motion/Cursor.tsx`         | client                 | Fine pointer only. Hides on keyboard use. Labels from `data-cursor`.                                      |
-| Magnetic                      | `components/motion/Magnetic.tsx`       | client                 | Wraps one child. `gsap.quickTo`.                                                                          |
-| PageTransition                | `components/motion/PageTransition.tsx` | client                 | `TransitionProvider`, panel, `TransitionLink` (wraps `next/link`, keeps prefetch)                         |
-| SplitReveal                   | `components/motion/SplitReveal.tsx`    | client                 | SplitText `type: "lines"`, `mask: "lines"`, `autoSplit`                                                   |
-| Preloader                     | `components/motion/Preloader.tsx`      | client                 | Plus an inline head script and a CSS failsafe (see §8)                                                    |
-| Hero                          | `components/sections/Hero.tsx`         | server                 | Children `HeroFeed` (client) and `HeroDrift` (client)                                                     |
-| Story                         | `components/sections/Story.tsx`        | server                 | Renders the list DOM. `StoryController` (client, dynamic import) handles modes.                           |
-| Services                      | `components/sections/Services.tsx`     | server                 | `ServicesHover` (client), `Disclosure` on mobile                                                          |
-| WorkRail                      | `components/sections/WorkRail.tsx`     | server                 | `WorkRailController` (client, dynamic), `WorkHoverGL` (client, dynamic, `ssr: false`)                     |
-| Comments                      | `components/sections/Comments.tsx`     | server                 | No JS                                                                                                     |
-| Marquee                       | `components/sections/Marquee.tsx`      | server                 | `MarqueeController` (client)                                                                              |
-| Process                       | `components/sections/Process.tsx`      | server                 | No JS. Shared with `/services`.                                                                           |
-| Cta                           | `components/sections/Cta.tsx`          | server                 | Magnetic `Button`, `Clock`, `LiveDot`                                                                     |
-| Button                        | `components/ui/Button.tsx`             | server                 | Variants `primary` (badge pill) and `secondary` (rule pill). Renders a link, anchor, or button.           |
-| MediaSlot                     | `components/ui/MediaSlot.tsx`          | server                 | See below. `InViewVideo` child (client).                                                                  |
-| StoryFrame                    | `components/ui/StoryFrame.tsx`         | server                 | 9:16 frame, segments, handle and year chrome. Used by Story and the 404.                                  |
-| Clock                         | `components/ui/Clock.tsx`              | client                 | `Intl.DateTimeFormat` in `brand.hq.timezone`. Updates on the minute.                                      |
-| LiveDot                       | `components/ui/LiveDot.tsx`            | server                 | CSS-only pulse, static under reduced motion                                                               |
-| Chip                          | `components/ui/Chip.tsx`               | client                 | Toggle button with `aria-pressed`, for filters and service multi-select                                   |
-| RadioPill                     | `components/ui/RadioPill.tsx`          | server                 | Native radio styled as a pill                                                                             |
-| Disclosure                    | `components/ui/Disclosure.tsx`         | client                 | Button and region with `aria-expanded` and `aria-controls`                                                |
-| Field                         | `components/ui/Field.tsx`              | server                 | Label, control, hint, and error wired with `aria-describedby` and `aria-invalid`                          |
-| Avatar                        | `components/ui/Avatar.tsx`             | server                 | Square initials                                                                                           |
-| WorkFilter, WorkGrid          | `components/work/*`                    | client, server         | URL sync with `useSearchParams`, GSAP Flip                                                                |
-| CaseGallery, Metric, NextCase | `components/work/*`                    | server, server, client |                                                                                                           |
-| TeamGrid, LocalTime           | `components/about/*`                   | server, client         |                                                                                                           |
-| ContactForm                   | `components/contact/ContactForm.tsx`   | client                 | `useActionState`, client-side zod on blur and submit                                                      |
-| `submitInquiry`               | `app/contact/actions.ts`               | server action          | zod, honeypot, minimum time to submit, Resend                                                             |
+| Component                  | Path                                         | Runtime             | Notes                                                                                                                            |
+| -------------------------- | -------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Nav                        | `components/layout/Nav.tsx`                  | client              | Hides on scroll down, returns on scroll up. Reads the surface under it for colors. Contact badge dot. Magnetic links.            |
+| MobileMenu                 | `components/layout/MobileMenu.tsx`           | client              | Focus trap, Esc, page behind made `inert`, scroll lock, focus returned to "Menu"                                                 |
+| Footer                     | `components/layout/Footer.tsx`               | server              | Nav, social text links, privacy, © year                                                                                          |
+| SkipLink                   | `components/layout/SkipLink.tsx`             | server              | "Skip to content", first focusable element                                                                                       |
+| SmoothScroll               | `components/motion/SmoothScroll.tsx`         | client              | Lenis after first idle, on the GSAP ticker only while a scroll is in flight; syncs ScrollTrigger when present                    |
+| Cursor                     | `components/motion/Cursor.tsx`               | client              | Fine pointer only. Sleeps when caught up. Hides on Tab and arrows, and over text fields.                                         |
+| Magnetic                   | `components/motion/Magnetic.tsx`             | client              | Wraps one child. `gsap.quickTo`.                                                                                                 |
+| PageTransition             | `components/motion/PageTransition.tsx`       | client              | `TransitionProvider`: panel, route commit detection, back/forward handling, headline reveal, dev-only ScrollTrigger leak warning |
+| TransitionLink             | `components/motion/TransitionLink.tsx`       | client              | Wraps `next/link`. Modified clicks, new tabs, same-page anchors, and query-only changes keep native behavior.                    |
+| Preloader                  | `components/motion/Preloader.tsx`            | client              | requestAnimationFrame and Web Animations API, no GSAP. Inline head script plus CSS failsafe.                                     |
+| InlineScript               | `components/motion/InlineScript.tsx`         | server              | The pre-paint head script (`data-js`, `data-preload`)                                                                            |
+| Hero                       | `components/sections/Hero.tsx`               | server              | Feed frame, live row, "Pause feed"                                                                                               |
+| HeroMotion                 | `components/sections/HeroMotion.tsx`         | client, lazy        | `useGSAP`. Owns the headline split, reveal, drift, frame scale, and feed loop.                                                   |
+| Story                      | `components/sections/Story.tsx`              | server              | One DOM for all three modes                                                                                                      |
+| StoryController            | `components/sections/StoryController.tsx`    | client, lazy        | `useGSAP` and `gsap.matchMedia`. Pinned or viewer mode, set up near the viewport.                                                |
+| Services                   | `components/sections/Services.tsx`           | server              | Hover list (1024px and up) and `Disclosure` accordion (below)                                                                    |
+| ServicesHover              | `components/sections/ServicesHover.tsx`      | client, lazy        | `useGSAP`. The single preview frame.                                                                                             |
+| WorkRail                   | `components/sections/WorkRail.tsx`           | server              | Swipe, pinned, or grid by CSS and media queries                                                                                  |
+| WorkRailController         | `components/sections/WorkRailController.tsx` | client, lazy        | `useGSAP`. Pin, drag, focus scrolling, set up near the viewport.                                                                 |
+| WorkHoverGL                | `components/sections/WorkHoverGL.tsx`        | client, lazy        | R3F and drei `shaderMaterial`. One shared canvas, capable desktops only.                                                         |
+| Comments                   | `components/sections/Comments.tsx`           | server              | No JS                                                                                                                            |
+| Marquee, MarqueeMotion     | `components/sections/Marquee*.tsx`           | server, client lazy | Wordmarks, clones, "Pause" control; ticks only while visible and unpaused                                                        |
+| Process                    | `components/sections/Process.tsx`            | server              | Shared by home and Services                                                                                                      |
+| Cta                        | `components/sections/Cta.tsx`                | server              | Magnetic xl pill, email, live line. Home only.                                                                                   |
+| motion-loaders, *Loader    | `components/sections/`                       | client              | `next/dynamic` with `ssr: false`, rendered only after first idle                                                                 |
+| Button                     | `components/ui/Button.tsx`                   | server              | Variants `primary` and `secondary`; sizes `md`, `lg`, `xl`. Link, anchor, or button.                                             |
+| MediaSlot                  | `components/ui/MediaSlot.tsx`                | server              | Placeholder or `next/image`; `InViewVideo` child for video                                                                       |
+| StoryFrame                 | `components/ui/StoryFrame.tsx`               | server              | The 9:16 frame with segments (404)                                                                                               |
+| PageHeader                 | `components/ui/PageHeader.tsx`               | server              | Inner-page h1 with `data-page-title`                                                                                             |
+| Clock, LiveLine, LocalTime | `components/ui/*`                            | client              | One shared minute ticker through `useSyncExternalStore`                                                                          |
+| LiveDot                    | `components/ui/LiveDot.tsx`                  | server              | CSS pulse, three times                                                                                                           |
+| Chip                       | `components/ui/Chip.tsx`                     | client              | Toggle button with `aria-pressed`                                                                                                |
+| Disclosure                 | `components/ui/Disclosure.tsx`               | client              | Button in a heading, `aria-expanded`, `aria-controls`, `hidden` panel                                                            |
+| WorkIndex, WorkGrid        | `components/work/WorkIndex.tsx`              | client              | `?service=` through the History API; Flip loaded in idle time; full static fallback                                              |
+| CaseLink                   | `components/work/CaseLink.tsx`               | server              | Cover, client, result                                                                                                            |
+| ContactPanel, ContactForm  | `components/contact/*`                       | client              | `useActionState`, client-side zod on blur and submit, error summary                                                              |
+| `submitInquiry`            | `app/contact/actions.ts`                     | server action       | zod, honeypot, minimum fill time, Resend                                                                                         |
 
-**MediaSlot.** It's a discriminated union: `kind: "video"` requires `poster`, which the type checker enforces.
+Native checkboxes and radios dressed as pills (`.choice`) replace the planned `RadioPill`. Form fields are written inline in `ContactForm` rather than through a `Field` wrapper. Avatars are a small local component in `Comments`.
 
-- **Props.** `ratio` (`"9:16" | "4:5" | "1:1" | "16:9"`), `src?`, `alt`, `label`, `tone` (`"midnight" | "dusk" | "lilac" | "haze" | "screenlight"`; badge is excluded because it's never decorative), `kind`, `sizes`, `priority?`, and `fill?`. `fill` is for the mobile Story viewer, where the box comes from the layout instead of the ratio.
-- **Without `src`.**
-  - Fill: the tone.
-  - Grain: SVG `feTurbulence` noise as a data-URI background, about 6% opacity.
-  - Label: centered, in `small` at the contrasting text color for the tone.
-  - Semantics: `role="img"` with `aria-label={alt}`.
-- **With `src`.**
-  - Images: `next/image` with explicit `sizes` and a blur placeholder.
-  - Video: muted, `playsInline`, `loop`, and `preload="none"`. It plays only while intersecting and requires a poster.
-- **Inside Story frames with real media,** a short functional top scrim keeps the handle and year legible. See open question 7.
+**MediaSlot.** It's a discriminated union: `kind: "video"` with a `src` requires `poster`, which the type checker enforces.
 
-**Content files** (`src/content/`, all typed): `brand.ts`, `story.ts`, `services.ts`, `work.ts`, `team.ts`, `testimonials.ts`, `faq.ts`, plus `clients.ts` (wordmarks), `process.ts`, `site.ts` (page headlines, section copy, metadata descriptions, CTA), `contact.ts` (form labels, hints, errors, success), and `legal.ts` (privacy).
+- **Props.** `ratio` (`"9:16" | "4:5" | "1:1" | "16:9"`), `src?`, `alt`, `label`, `tone` (`"midnight" | "dusk" | "lilac" | "haze" | "screenlight"`; badge is excluded because it's never decorative), `kind`, `sizes` (required), `eager?`, `fill?`, `blurDataURL?`. `fill` is for frames whose box comes from the layout.
+- **Without `src`.** Tone fill, SVG `feTurbulence` grain blended into the tone, and the label centered in `small`. Semantics: `role="img"` with `aria-label={alt}`.
+- **With `src`.** Images: `next/image` with explicit `sizes`, `loading`/`fetchPriority` for the LCP candidate (Next 16 deprecates `priority`), and a blur or tone-colored placeholder. Video: muted, `playsInline`, `loop`, `preload="none"`, plays only while intersecting, native controls instead of autoplay under reduced motion.
 
-**Lib** (`src/lib/`): `gsap.ts` (registers ScrollTrigger, SplitText, and Flip once, client-only), `motion.ts` (`usePrefersReducedMotion`, `useFinePointer`, low-power check), `time.ts` (time-zone formatting, minute scheduler), `validation.ts` (one zod schema shared by client and server), `seo.ts` (metadata helpers, Organization JSON-LD), and `utils.ts`.
+**Content files** (`src/content/`, all typed): `brand.ts`, `story.ts`, `services.ts`, `work.ts`, `team.ts`, `testimonials.ts`, `faq.ts`, `clients.ts`, `process.ts`, `site.ts`, `contact.ts`, `legal.ts`, and `types.ts`.
+
+**Lib** (`src/lib/`): `gsap.ts` (on-demand kit, `withGsap`, ScrollTrigger registry), `idle.ts` (first-idle gate), `when-near.ts` (set up near the viewport, with scroll compensation), `reveal.ts`, `scroll.ts` (Lenis store, `scrollToTarget`, scroll lock), `motion.ts` (media-query hooks, low-power check), `preload.ts`, `time.ts`, `words.ts`, `copy.ts`, `validation.ts`, `seo.ts`, `og.tsx`, `site.ts`, `fonts.ts`, `utils.ts`.
 
 ---
 
 ## 8. Engineering notes
 
-**Versions.** Checked on the npm registry on 2026-10-06; installed as `@latest` at scaffold, not pinned from memory:
+**Versions** (npm registry, 2026-10-06):
 
-| Package            | Version |
-| ------------------ | ------- |
-| next               | 16.3.8  |
-| react              | 19.3.0  |
-| tailwindcss        | 4.3.3   |
-| gsap               | 3.15.0  |
-| @gsap/react        | 2.1.2   |
-| lenis              | 1.3.26  |
-| @react-three/fiber | 9.8.1   |
-| @react-three/drei  | 10.7.9  |
-| three              | 0.186.1 |
-| zod                | 4.6.5   |
-| resend             | 6.32.0  |
+| Package                                      | Version                | Note                                                                       |
+| -------------------------------------------- | ---------------------- | -------------------------------------------------------------------------- |
+| next                                         | 16.3.8                 |                                                                            |
+| react, react-dom                             | 19.3.0                 |                                                                            |
+| tailwindcss                                  | 4.3.3                  |                                                                            |
+| gsap, @gsap/react                            | 3.15.0, 2.1.2          |                                                                            |
+| lenis                                        | 1.3.26                 |                                                                            |
+| @react-three/fiber, @react-three/drei, three | 9.8.1, 10.7.9, 0.186.1 |                                                                            |
+| zod, resend                                  | 4.6.5, 6.32.0          |                                                                            |
+| typescript                                   | 6.0.3                  | 7.0 is out, but typescript-eslint supports only versions below 6.1         |
+| eslint                                       | 9.39.5                 | 10 is out, but the React plugin in `eslint-config-next` 16.3 crashes on it |
 
-Docs get checked where APIs have moved: the Next 16 view-transition status, the zod 4 API, and SplitText's `mask` and `autoSplit` options.
+**Page transitions.** Next 16.3 exposes React's `<ViewTransition>` with no flag, but it ships from React's canary channel, which React hasn't marked stable. Per the brief, the site uses its own `TransitionProvider` and `TransitionLink`. A layout effect detects the committed route before paint. Back and forward navigations are covered before the new page paints, then play the same exit wipe.
 
-**Preloader without flash or lock-in.**
+**Loading strategy.** Nothing that moves is needed to paint.
 
-- **Overlay gating.** A tiny inline `<head>` script sets `data-preload` on `<html>` only when there's no session flag and no reduced-motion preference. CSS shows the overlay only under that attribute. Without JS there's no attribute and no overlay.
-- **Hard cap in CSS.** A `2.5s` CSS animation hides the overlay even if JS stalls.
-- **LCP.** The hero headline is server-rendered and painted under the overlay, so LCP records at first paint. SplitText splits the headline only when the reveal starts. Each line ends up smaller than the original block, so it can't register a later, larger LCP entry.
+- The head script sets `data-js` (so CSS can lay out scripted sections before hydration) and, on first home visits, `data-preload`.
+- GSAP and SplitText load through `loadGsap()` after the `load` event and first idle period. A link click asks for them urgently, and the preloader skips the wait.
+- ScrollTrigger is imported only by the home page's lazy chunks (hero, Story, rail), which register it with `lib/gsap`. Inner pages never load it or its always-on animation-frame loop.
+- Section choreography lives in lazy `useGSAP` chunks rendered after first idle. The Story and rail set up only when within a viewport of the screen, in idle time, with refresh priorities so pins always measure top to bottom. If the page was reloaded below a pin, the scroll position is compensated by the height the pin adds.
+- Idle pages cost nothing per frame: Lenis ticks only during a scroll, the cursor sleeps when caught up, the marquee runs only while visible, the feed waits on timeouts.
+- `experimental.inlineCss` inlines Tailwind's output (about 9 KB gzipped), removing the render-blocking stylesheet request.
 
-**Lenis and GSAP wiring.**
+**Preloader.** The head script gates the overlay, so no-JS visitors never see it. A 2.5s CSS animation hides it even if scripts stall. In JS, the sequence fits into whatever time is left before 2.4s and aborts in a hidden tab. The hero headline is server-rendered and painted under the overlay, so LCP records at first paint.
 
-- **Clock.** One Lenis instance (`lerp: 0.1`, `autoRaf: false`) driven by `gsap.ticker`, with `lagSmoothing(0)`, and `lenis.on("scroll", ScrollTrigger.update)`.
-- **Refresh.** `ScrollTrigger.refresh()` runs after `document.fonts.ready` and after every route transition completes.
-- **Reduced motion.** Lenis isn't created, and native scroll is used.
-- **Anchor links.** Same-page hash links go through `lenis.scrollTo(target, { offset })`. On load with a hash, the scroll happens after the first refresh.
+**Contrast guard in the Story.** The background tweens only while lines are masked out. When the ink flips (2019 to 2020), incoming lines wait for the background to finish.
 
-**Cleanup.**
+**WebGL.** One canvas for the rail, `pointer-events: none`, `frameloop="demand"` when idle. It loads only on fine-pointer desktops without reduced motion, with more than 4 cores and no data saver, once the rail is near. The texture is the real image when there's a `src`, otherwise a canvas-drawn copy of the placeholder. three r183 deprecates `THREE.Clock`, which R3F 9.8 still constructs. That single notice is filtered through three's `setConsoleFunction`; everything else passes through.
 
-- Every animation lives in `useGSAP({ scope })`, which reverts its context on unmount and kills its ScrollTriggers.
-- Mode switches use `gsap.matchMedia()`, which reverts automatically when a query stops matching.
-- In development, the transition provider logs a warning if `ScrollTrigger.getAll().length` isn't zero after a route change.
+**Contact.** One zod schema on blur, on submit, and in the server action. The client dispatches the action by hand, so typed values survive a server error. There's a honeypot (`address`) and a 3-second minimum from interactive to submit. Without `RESEND_API_KEY`, development logs the payload and production logs a warning without personal data; both return success.
 
-**Page transitions.**
+**SEO.** Metadata API on every route with canonical URLs from `NEXT_PUBLIC_SITE_URL`, `generateMetadata` and per-case-study Open Graph images (prerendered), a site Open Graph image and icons rendered with Poppins Bold from a bundled TTF (OFL), `sitemap.ts`, `robots.ts`, and Organization JSON-LD on the home page (escaped, and without placeholder `sameAs` URLs).
 
-- **Approach.** Phase 2 starts by checking whether Next 16.3's view-transition support is out from behind `experimental`. If it's still flagged, the build uses a `TransitionProvider` with a custom `TransitionLink`. The panel is a fixed layout element.
-- **Back and forward.** Browser back/forward can't be intercepted before the route changes, so popstate navigations play only the enter wipe.
-
-**WebGL.**
-
-- **Shared canvas.** One canvas for the whole rail (one WebGL context), positioned over the hovered item, with `frameloop="demand"` when idle.
-- **Loading conditions.** It's loaded through `next/dynamic` with `ssr: false`, and only when all of these hold:
-  - `(hover: hover) and (pointer: fine)`
-  - no reduced-motion preference
-  - `hardwareConcurrency > 4`
-  - no `saveData`
-- **Textures.** A real image when there's a `src`, otherwise a canvas-drawn copy of the placeholder, so the effect is visible before real media exists.
-
-**Contact.**
-
-- **Validation.** One zod schema, used on blur and submit in the client and again in the server action.
-- **Spam checks.** A honeypot field that's off-screen, `aria-hidden`, `tabIndex={-1}`, and `autoComplete="off"`, plus a minimum of 3 seconds between render and submit.
-- **No `RESEND_API_KEY`.** Development logs the payload and returns success. Production logs a warning without personal data and still returns success.
-
-**Hydration.** The clock renders an empty slot of fixed width on the server and fills it on mount, so the time is correct and there's no hydration mismatch. The footer year is computed at render. Static pages compute it at build time, so the root layout revalidates daily.
-
-**SEO.** Metadata API on every route, `generateMetadata` for case studies, canonical URLs from `NEXT_PUBLIC_SITE_URL`, `opengraph-image.tsx` with Poppins Bold bundled from a local TTF (no runtime fetch), `sitemap.ts`, `robots.ts`, and Organization JSON-LD on the home page.
-
-**Performance budget.**
-
-- No WebGL, Story, or rail code in the initial home chunk. All of it is dynamically imported.
-- Below-the-fold media is lazy-loaded. The first hero post gets `priority` once real media exists.
-- Only one font file, Poppins 700 latin.
+**Hydration.** Clocks render a fixed-width invisible "00:00" on the server and fill in on mount through one shared `useSyncExternalStore` ticker. The footer year is computed at render.
 
 ---
 
@@ -871,50 +840,83 @@ Docs get checked where APIs have moved: the Next 16 view-transition status, the 
 
 ### 9.1 Section 14 audit
 
-| Don't                                              | How the plan complies                                                                                                                                                                |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Accent a single word in a headline                 | Headlines are one color, one style. SplitText lines all inherit the same color. Underlines appear only on links in running text, as a link affordance.                               |
-| All-caps eyebrows, labels that carry nothing       | No `uppercase` anywhere. Section headings are sentences that say something. The labels that remain carry information: form labels, `<dl>` terms on case studies, years in the Story. |
-| Middle dots, "Word — fragment" labels              | Metadata stacks on separate lines or uses a `<dl>`. Comment meta is separated by space. The marquee uses space only.                                                                 |
-| "→" on links or buttons                            | None. Link text says what happens: "See all work", "Start a project", "Go to the home page".                                                                                         |
-| 01/02/03 on non-sequences                          | Numbers appear only on Process (1 to 4), a real sequence. The Story uses years and segments, also a real sequence. Services, work, team, and values are unnumbered.                  |
-| Grids of identical rounded cards with soft shadows | Radius only on 9:16 frames and pills. One shadow on the whole site. Work grids mix ratios deliberately.                                                                              |
-| Decorative gradient washes                         | None. The only gradient anywhere is the functional scrim in open question 7, and it appears only when real media is supplied.                                                        |
-| Entrance animations on every section               | Only the hero (load) and a page h1 (after a transition).                                                                                                                             |
-| Hotlinked stock, real logos, lorem ipsum           | MediaSlot placeholders are art-directed and labeled. Clients and people are fictional. Every word is written.                                                                        |
-| `#000`, `#0B0B0B`, `#111`                          | Impossible through Tailwind (palette reset). QA greps for hex literals outside `globals.css`.                                                                                        |
+| Don't                                              | How the build complies                                                                                                                                                                                     |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Accent a single word in a headline                 | Headlines are one color, one style. SplitText lines all inherit the same color. Underlines appear only on links in running text.                                                                           |
+| All-caps eyebrows, labels that carry nothing       | No `uppercase` anywhere. Section headings are sentences that say something. The labels that remain carry information: form labels, `<dl>` terms on case studies, "Related case study", years in the Story. |
+| Middle dots, "Word — fragment" labels              | Metadata stacks on separate lines or uses a `<dl>`. Comment meta is separated by space. The marquee uses space only.                                                                                       |
+| "→" on links or buttons                            | None. Link text says what happens.                                                                                                                                                                         |
+| 01/02/03 on non-sequences                          | Numbers appear only on Process (1 to 4). The Story uses years and segments.                                                                                                                                |
+| Grids of identical rounded cards with soft shadows | Radius only on 9:16 frames and pills. One shadow on the whole site.                                                                                                                                        |
+| Decorative gradient washes                         | None.                                                                                                                                                                                                      |
+| Entrance animations on every section               | Only the hero (load) and a page h1 (after a transition).                                                                                                                                                   |
+| Hotlinked stock, real logos, lorem ipsum           | Placeholders are art-directed and labeled. Clients and people are fictional. Every word is written.                                                                                                        |
+| `#000`, `#0B0B0B`, `#111`                          | Impossible through Tailwind (palette reset), and an ESLint rule rejects those literals.                                                                                                                    |
 
 ### 9.2 Revisions: what read as a default, and what replaced it
 
-For each part of the site, I sketched the version I'd produce for any agency, then checked it against this brief.
+| Area             | First instinct                        | Build                                             | Why                                                                  |
+| ---------------- | ------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------- |
+| Story background | Continuous scrubbed blend             | Six stepped stops behind masked text              | The continuous midpoint caps at 3.96:1, which fails body copy.       |
+| Story visuals    | Crossfade                             | Hard cut inside the frame                         | Native Stories cut. (The risk named in §1.)                          |
+| Hero frame       | Phone mockup                          | A bare 9:16 frame                                 | The subject is the medium, not the hardware.                         |
+| Hero bottom      | "Scroll to explore" cue               | Removed                                           | The advancing feed and the live clock already say the page is alive. |
+| Light and dark   | Strict alternation                    | Night is the feed, day is the desk                | Each band has a reason.                                              |
+| Services         | Numbered rows with arrows             | Unnumbered; the row opens and one preview follows | Not a sequence, and §14.                                             |
+| Comments         | Circle avatars, hearts, reply buttons | Square initials, likes as text, no fake controls  | Radius rule; hearts point to a platform.                             |
+| Marquee          | ✦ or • separators                     | Space only                                        | Separators are decoration.                                           |
+| Process          | Giant outlined numerals               | Numerals at `h3`, inline                          | True sequence, but the number isn't the content.                     |
+| Footer           | Giant bleeding wordmark               | Small and quiet                                   | The CTA already holds the closing big type.                          |
+| Cursor           | `mix-blend-mode: difference`          | Solid, surface-aware                              | Blending takes the cursor off-palette.                               |
+| Preloader exit   | The circle shrinks back               | Wipes out the top                                 | One gesture for the whole site.                                      |
 
-| Area             | First instinct                                                               | Plan now                                                                       | Why                                                                                                              |
-| ---------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| Story background | Continuous scrubbed blend from midnight to screenlight, text flipping at 50% | Six stepped stops. The background moves only while text is masked out.         | Computed: the continuous midpoint caps at 3.96:1, which fails body copy, and a user can stop scrolling anywhere. |
-| Story visuals    | Crossfade between chapters                                                   | Hard cut inside the frame. Motion lives outside it.                            | Native Stories cut. The crossfade is the template reflex. (The risk named in §1.)                                |
-| Hero frame       | Phone mockup with notch and status bar                                       | A bare 9:16 frame, 28px radius                                                 | The subject is the medium, not the hardware. Device mockups date fast.                                           |
-| Hero bottom      | "Scroll to explore" cue with a bouncing chevron                              | Removed                                                                        | The advancing feed and the live clock already say the page is alive. The cue carries no information.             |
-| Light and dark   | Strict dark/light alternation                                                | Color follows subject: night is the feed, day is the desk                      | The brief asks for deliberate, not mechanical, and this gives each band a reason.                                |
-| Services         | Numbered rows "01 to 06" with arrow icons                                    | Unnumbered, no arrows. The row opens and a preview frame follows.              | Services aren't a sequence, and §14.                                                                             |
-| Comments         | Circle avatars, heart icons, a reply button                                  | Square initial avatars, likes as text, no fake controls                        | Radius rule. Hearts point to a specific platform. Buttons that do nothing are lies.                              |
-| Comments content | Four testimonials only                                                       | Four testimonials plus one dry reply from the team                             | It shows the 24/7 community desk instead of claiming it.                                                         |
-| Marquee          | ✦ or • between wordmarks                                                     | Space only                                                                     | Separators are decoration, and the middle-dot rule.                                                              |
-| Process          | Giant outlined numerals                                                      | Numerals at `h3`, inline with the step name                                    | It's a true sequence, so numbers stay, but the number isn't the content. Poppins Bold has no outline cut either. |
-| Footer           | Giant brand wordmark bleeding off the bottom                                 | A small, quiet footer                                                          | That move has been everywhere since 2024. The CTA statement already holds the closing big-type moment.           |
-| Section intros   | Parenthetical eyebrows like "(02) Services"                                  | None                                                                           | They carry nothing, and §14.                                                                                     |
-| Cursor           | `mix-blend-mode: difference` circle                                          | Solid, surface-aware dot and ring                                              | Difference blending turns badge red into cyan and takes the cursor off-palette.                                  |
-| Preloader exit   | The red circle shrinks back to a dot                                         | The red layer wipes out the top                                                | One gesture for the whole site: swipe to the next story.                                                         |
-| Headline bleed   | Crop the hero headline off the right edge                                    | No cropped headlines. The marquee is the one element that runs off both edges. | The tagline is the LCP element and the thesis. It has to read in full at 375px.                                  |
+### 9.3 Decisions approved on 2026-10-06
 
-### 9.3 Where the plan interprets or bends the brief (please confirm)
+All ten proposals from the plan were approved as written: midnight focus rings on light surfaces; circles reserved for signals; stepped Story backgrounds; errors in midnight rather than red; the About headline counted from `brand.founded` ("Eleven years on the night shift."); "at HQ" while `hq.city` is "TBD"; a functional scrim only over real Story media (not yet needed, since every slot is a placeholder); an 8-column tablet grid; 0.45s transition phases; and the GitHub repository for commits.
 
-1. **Focus ring on light surfaces.** Lilac scores 2.15:1 on screenlight and 1.88:1 on haze, which fails WCAG 1.4.11. Plan: lilac on night surfaces, midnight on day and haze.
-2. **Circles for signals.** Besides pills, the badge, the live dots, and the cursor ring are round. Avatars stay square to respect the rule.
-3. **Story background.** Stepped and tweened per chapter rather than continuously scrubbed (§2.4). The progress segments are still fully scrubbed.
-4. **Errors aren't red.** The brief limits badge red to live, unread, count, and the primary CTA. Errors use midnight text, `aria-invalid`, and an error summary.
-5. **About headline.** "Ten years on the night shift." But 2015 to 2026 is eleven years. Recommendation: derive it from `brand.founded` and spell it out ("Eleven years on the night shift."), so it stays true and rebrands cleanly.
-6. **HQ city is "TBD".** Recommendation: when `hq.city` is unset, copy says "at HQ" ("It's 02:14 at HQ."). Once it's set, it reads "in Manila". The time zone already points there.
-7. **Functional scrim.** When a Story frame gets real media, a short top scrim (midnight to transparent, about 96px) keeps the handle and year at AA. Placeholders don't need it.
-8. **Tablet grid.** 8 columns from 768 to 1023px, which the brief leaves open.
-9. **Durations.** 0.45s per phase in the preloader and page transitions, to honor the 2.5s and 900ms caps.
-10. **Workspace.** The project goes in `FOR EDITS/the-lux-expo/`. That folder isn't a git repo yet, so Phase 1 runs `git init` there and commits this document first. Commits stay local, with no remote and no push.
+---
+
+## 10. Where the build departs from the plan
+
+| Plan                                     | Build                                                                                    | Why                                                                                                                                                                                                  |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Three-zone Story stage from 1024px       | From 1280px; frame-left layout from 768 to 1279px                                        | Measured: the longest title words ("Everyone", "platform,") are about 4.5em at `h1`. Beside a centered 82vh frame they don't fit below 1280px. The wide-stage frame also narrows so they always fit. |
+| Phone viewer titles at `h1`              | `h2` size                                                                                | At 44px the title and copy crowd out the visual on a 667px-tall phone.                                                                                                                               |
+| GSAP through `useGSAP` everywhere        | `useGSAP` in every section choreography chunk; site-wide systems use an on-demand loader | `@gsap/react` imports GSAP statically. Loading it on demand keeps about 45 KB gzipped out of every page's critical path.                                                                             |
+| Preloader on GSAP                        | requestAnimationFrame and the Web Animations API                                         | It has to start the moment the page hydrates, before GSAP has loaded.                                                                                                                                |
+| No pause controls                        | "Pause feed" and "Pause" on the marquee; the live dot pulses three times                 | WCAG 2.2.2: content that moves on its own for more than 5 seconds needs a way to stop it.                                                                                                            |
+| Hover preview follows the pointer freely | Follows vertically, drifts within the right third horizontally                           | Following freely, it covered the service name it was previewing.                                                                                                                                     |
+| Case study gallery as a wrapped row      | Balanced CSS columns                                                                     | A wrapped row left a single item orphaned on a second line.                                                                                                                                          |
+| Closing CTA on Services                  | Removed                                                                                  | Restraint pass (§11).                                                                                                                                                                                |
+
+---
+
+## 11. QA log
+
+**Method.** Playwright drove the system's Edge browser against a production build: full-page screenshots of every route at 375, 768, and 1440 (`npm run screenshots`), scripted checks of every interaction, axe-core on every route at two widths with and without reduced motion (`npm run a11y`), Lighthouse mobile, and a development pass for hydration warnings and ScrollTrigger leaks.
+
+**The five weakest details, fixed.**
+
+1. **Hero feed frame cramped on phones.** At 2 of 4 columns (about 160px), handle, label, and caption collided. It now spans 3 columns.
+2. **An orphan in the case study gallery.** The fourth item sat alone on a second row. The gallery now uses balanced columns.
+3. **The same case study twice in a row on Services.** Paid social and Reporting both linked Kilo Skincare. Reporting now links Bramble Books.
+4. **Comment avatars nearly invisible.** Haze on screenlight is 1.14:1. They're lilac now, with midnight initials at 7.29:1.
+5. **Case study metadata squeezed on tablets.** Three `<dl>` columns in about 420px wrapped "Services" into five lines. It stacks from 768 to 1023px.
+
+A sixth item looked like a bug in full-page captures, the team card's role and local time overlapping at 768px. Live rendering was correct; the card was rewritten so stacking is the default and only hover-capable devices overlay the two lines anyway.
+
+**Restraint pass.** The closing "Your audience is online right now." CTA, repeated at the bottom of the Services page, was removed. It is the home page's last word, and repeating it made it a footer. Contact stays one click away in the nav, with its badge dot.
+
+**Results** (production build on a local server; Lighthouse 13.5 mobile, median of three runs):
+
+| Page       | Performance | Accessibility | Best Practices | SEO | LCP (simulated) | LCP (applied throttling) | TBT   | CLS   |
+| ---------- | ----------- | ------------- | -------------- | --- | --------------- | ------------------------ | ----- | ----- |
+| Home       | 92          | 100           | 100            | 100 | 2.47s           | 1.2s                     | 261ms | 0.017 |
+| Work       | 97          | 100           | 100            | 100 | 2.48s           | 1.2s                     | 115ms | 0     |
+| Case study | 90          | 100           | 100            | 100 | 2.51s           | 1.2s                     | 326ms | 0     |
+
+Scores moved by up to ±8 between identical runs on this machine. Simulated LCP sits at the 2.5s line because Lighthouse's simulation counts every script requested before first paint (React and the Next runtime alone are about 125 KB gzipped). The pages paint their text without JavaScript: observed first paint locally is 150 to 320ms. Measure the deployed site with PageSpeed Insights for the definitive numbers.
+
+- **axe-core:** no WCAG 2.2 A/AA violations on any route, at 375 and 1440, with and without reduced motion.
+- **Development pass:** no console errors, hydration warnings, or ScrollTrigger leaks across a full navigation loop, including back and forward.
+- **Idle cost:** an inner page at rest spends 0ms on script per 5 seconds (4× CPU throttle), down from 236ms before the idle work.

@@ -1,5 +1,5 @@
 import { brand } from "@/content/brand";
-import { home } from "@/content/site";
+import { home, type FeedPost } from "@/content/site";
 import { Clock } from "@/components/ui/Clock";
 import { LiveDot } from "@/components/ui/LiveDot";
 import { MediaSlot } from "@/components/ui/MediaSlot";
@@ -7,7 +7,7 @@ import { HeroMotion } from "./motion-loaders";
 
 /** Home hero: the tagline as the thesis, a live feed frame, and the HQ clock. */
 export function Hero() {
-  const posts = home.hero.feed;
+  const posts: FeedPost[] = home.hero.feed;
   // The first post repeats at the end so the feed can loop without a jump.
   const track = [...posts, ...posts.slice(0, 1)];
 
@@ -28,7 +28,7 @@ export function Hero() {
 
       <div
         data-hero-frame
-        className="col-span-2 col-start-3 self-start md:col-span-2 md:col-start-7 lg:col-span-3 lg:col-start-10"
+        className="col-span-3 col-start-2 self-start md:col-span-2 md:col-start-7 lg:col-span-3 lg:col-start-10"
       >
         <div
           id="hero-feed"
@@ -45,13 +45,14 @@ export function Hero() {
                   key={`${post.visual.id}-${index}`}
                   aria-hidden={isClone || undefined}
                   data-hero-media={index === 0 || undefined}
-                  className={`relative h-full w-full shrink-0 media-tone-${post.visual.tone}`}
+                  data-has-media={post.visual.src ? "" : undefined}
+                  className={`feed-post relative h-full w-full shrink-0 media-tone-${post.visual.tone}`}
                 >
                   <MediaSlot
                     {...post.visual}
                     fill
                     eager={index === 0}
-                    sizes="(min-width: 1024px) 22vw, (min-width: 768px) 25vw, 45vw"
+                    sizes="(min-width: 1024px) 22vw, (min-width: 768px) 25vw, 70vw"
                   />
                   <p className="absolute top-4 left-4 text-small">{post.handle}</p>
                   <p className="absolute right-4 bottom-4 left-4 text-small">{post.caption}</p>

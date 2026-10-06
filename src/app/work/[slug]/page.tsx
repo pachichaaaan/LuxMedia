@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { TransitionLink } from "@/components/motion/TransitionLink";
 import { MediaSlot } from "@/components/ui/MediaSlot";
-import type { Ratio } from "@/content/types";
 import { services } from "@/content/services";
 import { caseStudyPage } from "@/content/site";
 import { getTestimonial } from "@/content/testimonials";
@@ -28,14 +27,6 @@ export async function generateMetadata({ params }: PageProps<"/work/[slug]">): P
   };
 }
 
-/** Gallery widths by ratio, so the feed-native shapes keep their rhythm. */
-const GALLERY: Record<Ratio, string> = {
-  "9:16": "w-[70%] md:w-[calc(25%-1.5rem)]",
-  "4:5": "w-full md:w-[calc(33.333%-1.5rem)]",
-  "1:1": "w-full md:w-[calc(33.333%-1.5rem)]",
-  "16:9": "w-full md:w-[calc(58%-1.5rem)]",
-};
-
 export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]">) {
   const { slug } = await params;
   const study = getCaseStudy(slug);
@@ -59,7 +50,7 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
           <h1 data-page-title className="text-h1 text-ink">
             {study.headline}
           </h1>
-          <dl className="grid gap-6 text-small sm:grid-cols-3">
+          <dl className="grid gap-5 text-small sm:grid-cols-[2fr_1fr_1.5fr] md:grid-cols-1 lg:grid-cols-[2fr_1fr_1.5fr] lg:gap-6">
             <div>
               <dt className="text-ink-meta">{caseStudyPage.servicesLabel}</dt>
               <dd className="mt-1 text-ink">{serviceNames}</dd>
@@ -113,10 +104,14 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
         <h2 id="the-work" className="page-x text-h2 text-ink">
           {caseStudyPage.workHeading}
         </h2>
-        <ul className="mt-14 flex flex-wrap items-end gap-6 page-x md:gap-x-6 md:gap-y-12">
+        {/* Balanced columns: mixed ratios find their own rhythm and never leave an orphan. */}
+        <ul className="mt-14 gap-6 page-x md:columns-2 lg:columns-3">
           {study.gallery.map((visual) => (
-            <li key={visual.id} className={GALLERY[visual.ratio]}>
-              <MediaSlot {...visual} sizes="(min-width: 768px) 40vw, 90vw" />
+            <li key={visual.id} className="mb-6 break-inside-avoid">
+              <MediaSlot
+                {...visual}
+                sizes="(min-width: 1024px) 30vw, (min-width: 768px) 45vw, 90vw"
+              />
             </li>
           ))}
         </ul>

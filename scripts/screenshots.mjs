@@ -58,7 +58,10 @@ for (const reducedMotion of motionModes) {
     await context.addInitScript(() => sessionStorage.setItem("lux-intro", "1"));
     const page = await context.newPage();
     page.on("console", (message) => {
-      if (message.type() === "error") problems.push(`${page.url()} console: ${message.text()}`);
+      if (message.type() !== "error") return;
+      // The 404 route is supposed to answer 404.
+      if (page.url().endsWith("/this-post-is-gone") && message.text().includes("404")) return;
+      problems.push(`${page.url()} console: ${message.text()}`);
     });
     page.on("pageerror", (error) => problems.push(`${page.url()} pageerror: ${error.message}`));
 

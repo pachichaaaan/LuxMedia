@@ -1023,39 +1023,29 @@ html:not([data-js]) .marquee-clone {
   }
 }
 
-/* Team: hover swaps the role for the person's local time. Touch shows both. */
+/* Team: role and local time stack by default (touch, keyboard, no JS).
+   Where hover exists, the time sits under the role and swaps in on hover. */
 @layer components {
   .team-meta {
     display: grid;
   }
 
-  .team-role,
-  .team-time {
-    grid-area: 1 / 1;
-    transition: opacity 0.6s var(--ease-expo-out);
-  }
-
-  .team-time {
-    opacity: 0;
-  }
-
   @media (hover: hover) {
+    .team-role,
+    .team-time {
+      grid-area: 1 / 1;
+      transition: opacity 0.6s var(--ease-expo-out);
+    }
+
+    .team-time {
+      opacity: 0;
+    }
+
     .team-card:hover .team-role {
       opacity: 0;
     }
 
     .team-card:hover .team-time {
-      opacity: 1;
-    }
-  }
-
-  @media (hover: none) {
-    .team-role,
-    .team-time {
-      grid-area: auto;
-    }
-
-    .team-time {
       opacity: 1;
     }
   }
@@ -1140,5 +1130,55 @@ html:not([data-js]) .marquee-clone {
   .choice:has(input:focus-visible) {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
+  }
+}
+
+/*
+ * Functional scrims, only over real media: handles, years, and captions must
+ * stay readable on any photo. Placeholders don't need them; their tones are
+ * already checked for contrast.
+ */
+@layer components {
+  .feed-post[data-has-media] {
+    color: var(--color-screenlight);
+  }
+
+  .feed-post[data-has-media]::before,
+  .feed-post[data-has-media]::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    height: 6rem;
+    pointer-events: none;
+  }
+
+  .feed-post[data-has-media]::before {
+    top: 0;
+    background: linear-gradient(rgb(27 22 56 / 0.6), rgb(27 22 56 / 0));
+  }
+
+  .feed-post[data-has-media]::after {
+    bottom: 0;
+    background: linear-gradient(rgb(27 22 56 / 0), rgb(27 22 56 / 0.7));
+  }
+
+  .feed-post > p {
+    z-index: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-js] .story-visual {
+    position: relative;
+  }
+
+  html[data-js] .story-visual[data-has-media]::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 6rem;
+    border-radius: 28px 28px 0 0;
+    background: linear-gradient(rgb(27 22 56 / 0.6), rgb(27 22 56 / 0));
+    pointer-events: none;
   }
 }

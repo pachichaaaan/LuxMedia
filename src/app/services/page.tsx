@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Cta } from "@/components/sections/Cta";
 import { Process } from "@/components/sections/Process";
 import { Disclosure } from "@/components/ui/Disclosure";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -117,8 +116,6 @@ export default function ServicesPage() {
           ))}
         </div>
       </section>
-
-      <Cta />
     </>
   );
 }
