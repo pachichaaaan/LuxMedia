@@ -1,0 +1,342 @@
+@import "tailwindcss";
+
+/*
+ * Tokens. Tailwind's defaults are reset so only the brand palette, the one
+ * weight, and the type scale exist as utilities. `bg-black` won't compile.
+ */
+@theme {
+  --color-*: initial;
+  --color-midnight: #1b1638;
+  --color-screenlight: #f3f4f8;
+  --color-badge: #ff3d2e;
+  --color-lilac: #a99cff;
+  --color-dusk: #6e6a8a;
+  --color-haze: #e6e2ff;
+
+  --font-*: initial;
+  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+
+  --font-weight-*: initial;
+  --font-weight-bold: 700;
+
+  --text-*: initial;
+  --text-display: clamp(3.5rem, 11vw, 13rem);
+  --text-display--line-height: 0.88;
+  --text-display--letter-spacing: -0.045em;
+  --text-h1: clamp(2.75rem, 7vw, 7.5rem);
+  --text-h1--line-height: 0.92;
+  --text-h1--letter-spacing: -0.04em;
+  --text-h2: clamp(2rem, 4.5vw, 4.5rem);
+  --text-h2--line-height: 1;
+  --text-h2--letter-spacing: -0.03em;
+  --text-h3: clamp(1.375rem, 2vw, 2rem);
+  --text-h3--line-height: 1.15;
+  --text-h3--letter-spacing: -0.015em;
+  --text-body-lg: 1.25rem;
+  --text-body-lg--line-height: 1.5;
+  --text-body-lg--letter-spacing: -0.005em;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.65;
+  --text-body--letter-spacing: 0em;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.5;
+  --text-small--letter-spacing: 0.005em;
+
+  --radius-*: initial;
+  --radius-frame: 28px;
+  --radius-pill: 9999px;
+
+  --shadow-*: initial;
+  --shadow-story: 0 48px 96px -32px rgb(27 22 56 / 0.45);
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-shadow-*: initial;
+
+  --ease-*: initial;
+  --ease-expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-power3-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --animate-*: initial;
+
+  --container-measure: 62ch;
+
+  --breakpoint-3xl: 120rem;
+}
+
+/*
+ * Surface-aware colors. `inline` keeps the var() reference in the utility, so
+ * a component picks up whichever surface it sits in.
+ */
+@theme inline {
+  --color-surface: var(--bg);
+  --color-ink: var(--fg);
+  --color-ink-body: var(--fg-body);
+  --color-ink-meta: var(--fg-meta);
+  --color-rule: var(--rule);
+  --color-ring: var(--ring);
+  --color-accent: var(--accent);
+}
+
+@layer base {
+  :root {
+    --page-margin: clamp(20px, 4vw, 64px);
+    --gutter: 16px;
+    --cols: 4;
+    --nav-height: 4.5rem;
+  }
+
+  @media (width >= 48rem) {
+    :root {
+      --gutter: 24px;
+      --cols: 8;
+    }
+  }
+
+  @media (width >= 64rem) {
+    :root {
+      --cols: 12;
+    }
+  }
+
+  /* Night: the feed. */
+  :root,
+  [data-surface="night"] {
+    --bg: var(--color-midnight);
+    --fg: var(--color-screenlight);
+    --fg-body: color-mix(in srgb, var(--color-screenlight) 78%, transparent);
+    --fg-meta: color-mix(in srgb, var(--color-screenlight) 60%, transparent);
+    --rule: color-mix(in srgb, var(--color-screenlight) 22%, transparent);
+    --ring: var(--color-lilac);
+    --accent: var(--color-lilac);
+  }
+
+  /* Day: the desk. */
+  [data-surface="day"] {
+    --bg: var(--color-screenlight);
+    --fg: var(--color-midnight);
+    --fg-body: color-mix(in srgb, var(--color-midnight) 78%, transparent);
+    --fg-meta: var(--color-dusk);
+    --rule: color-mix(in srgb, var(--color-dusk) 45%, transparent);
+    --ring: var(--color-midnight);
+    --accent: var(--color-midnight);
+  }
+
+  /* Haze: the quietest room. Dusk fails small text here, so meta is midnight 66%. */
+  [data-surface="haze"] {
+    --bg: var(--color-haze);
+    --fg: var(--color-midnight);
+    --fg-body: color-mix(in srgb, var(--color-midnight) 78%, transparent);
+    --fg-meta: color-mix(in srgb, var(--color-midnight) 66%, transparent);
+    --rule: color-mix(in srgb, var(--color-dusk) 45%, transparent);
+    --ring: var(--color-midnight);
+    --accent: var(--color-midnight);
+  }
+
+  [data-surface] {
+    background-color: var(--bg);
+    color: var(--fg);
+  }
+
+  [data-surface="night"] {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    background-color: var(--color-midnight);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-padding-top: var(--nav-height);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-synthesis: none;
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    text-rendering: optimizeLegibility;
+    color: var(--fg);
+    background-color: var(--bg);
+    min-height: 100svh;
+  }
+
+  /* One weight, no faux styles: emphasis never changes the letterforms. */
+  em,
+  i,
+  cite {
+    font-style: normal;
+  }
+
+  strong,
+  b {
+    font-weight: inherit;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  p,
+  li,
+  dd {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-lilac);
+    color: var(--color-midnight);
+  }
+
+  /* Lenis recommended base styles. */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  .lenis:not(.lenis-autoToggle).lenis-stopped {
+    overflow: clip;
+  }
+
+  .lenis [data-lenis-prevent],
+  .lenis [data-lenis-prevent-wheel],
+  .lenis [data-lenis-prevent-touch] {
+    overscroll-behavior: contain;
+  }
+
+  .lenis.lenis-smooth iframe {
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Layout ------------------------------------------------------------------ */
+
+@utility page-x {
+  padding-inline: var(--page-margin);
+}
+
+@utility page-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  column-gap: var(--gutter);
+  padding-inline: var(--page-margin);
+}
+
+@utility section-y {
+  padding-block: 6rem;
+
+  @media (width >= 64rem) {
+    padding-block: max(20vh, 8rem);
+  }
+}
+
+/* Text links inside running copy: underlined, so color is never the only cue. */
+@utility link-inline {
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+
+  &:hover {
+    color: var(--accent);
+    text-decoration-color: currentColor;
+  }
+}
+
+/* Quiet links (nav, footer): underline appears on hover only. */
+@utility link-quiet {
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.25em;
+  text-decoration-color: transparent;
+
+  &:hover {
+    color: var(--accent);
+    text-decoration-color: currentColor;
+  }
+}
+
+/* Media placeholders ------------------------------------------------------ */
+
+@layer components {
+  .media-tone-midnight {
+    background-color: var(--color-midnight);
+    color: var(--color-screenlight);
+  }
+
+  .media-tone-dusk {
+    background-color: var(--color-dusk);
+    color: var(--color-screenlight);
+  }
+
+  .media-tone-lilac {
+    background-color: var(--color-lilac);
+    color: var(--color-midnight);
+  }
+
+  .media-tone-haze {
+    background-color: var(--color-haze);
+    color: var(--color-midnight);
+  }
+
+  .media-tone-screenlight {
+    background-color: var(--color-screenlight);
+    color: var(--color-midnight);
+  }
+
+  /* Film grain: monochrome turbulence, low opacity, blended into the tone. */
+  .media-grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 1.4 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 240px 240px;
+    mix-blend-mode: overlay;
+    opacity: 0.55;
+  }
+}
+
+/* Live signal ------------------------------------------------------------- */
+
+@layer components {
+  .live-dot {
+    border-radius: 9999px;
+    background-color: var(--color-badge);
+  }
+
+  .live-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-color: inherit;
+    animation: live-pulse 1.6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  }
+}
+
+@keyframes live-pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
