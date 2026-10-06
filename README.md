@@ -79,6 +79,14 @@ Every image and video is a `MediaSlot`. Without a `src` it renders a labeled pla
 2. Under **Settings → Environment Variables**, add `NEXT_PUBLIC_SITE_URL` (your production origin, for example `https://theluxexpo.com`). Add `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, and `CONTACT_FROM_EMAIL` if the contact form should deliver email.
 3. Deploy. Every push to `main` deploys to production. Pull requests get preview URLs.
 
+### Other hosts
+
+Any host that runs Node.js 20.9 or later works, using `npm run build` to build and `npm start` to serve. The contact form needs the Node server, so a static-only host won't do.
+
+On older Linux build servers, `npm run build` switches automatically. Next 16's native compiler needs glibc 2.30 or newer, and some servers are older (CloudLinux 8, RHEL 8, Ubuntu 18.04, Amazon Linux 2). On those, Turbopack can't start, so `scripts/build.mjs` detects the glibc version and builds with webpack on Next's WebAssembly compiler (`@next/swc-wasm-nodejs`) instead. It's slower but works anywhere.
+
+Make sure the host's build command is `npm run build`, not `next build`. Calling `next build` directly skips the check. Set `NEXT_BUILD_WEBPACK=1` to force the webpack build. `next.config.mjs` is plain JavaScript for the same reason: a TypeScript config would need the native compiler just to load.
+
 ## Quality checks
 
 The QA scripts use `playwright-core` with a browser that's already installed, so nothing large is downloaded. Start a production server first:

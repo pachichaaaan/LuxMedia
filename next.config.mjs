@@ -1,6 +1,9 @@
-import type { NextConfig } from "next";
+// Plain JavaScript on purpose: a .ts config has to be compiled by Next's native
+// SWC binary before the build can even start, and some Linux hosts are too old
+// to run it (see scripts/build.mjs).
 
-const nextConfig: NextConfig = {
+/** @type {import("next").NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   experimental: {
